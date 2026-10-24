@@ -1,0 +1,24 @@
+# Secrets and user files: never committed
+.env
+uploads/
+
+# Lab reports: block every PDF except the synthetic eval reports
+*.pdf
+!backend/evals/**/*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
