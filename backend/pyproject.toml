@@ -42,3 +42,6 @@ known-third-party = ["alembic"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Import `app` straight from this folder. Don't rely on the editable install's
+# .pth file: macOS can mark it hidden, and Python 3.12 then skips it.
+pythonpath = ["."]
