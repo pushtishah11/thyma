@@ -32,5 +32,13 @@ line-length = 100
 # E/F: errors, I: import order, B: common bugs, UP: modern Python syntax
 select = ["E", "F", "I", "B", "UP"]
 
+[tool.ruff.lint.isort]
+# Our alembic/ migrations folder shares the package's name; it's still a library.
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+# conftest must set DATABASE_URL before importing the app, so imports come after code.
+"tests/conftest.py" = ["E402"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
