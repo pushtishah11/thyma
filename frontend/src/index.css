@@ -1,0 +1,36 @@
+/* Global colors and base styles. Components use CSS modules for everything else. */
+
+:root {
+  --text: #4a4553;
+  --text-strong: #1b1820;
+  --muted: #a8a2b0;
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --border: #e6e3e8;
+  --ok: #2f8a5b;
+  --error: #b3403a;
+
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #c9c4d0;
+    --text-strong: #f4f2f6;
+    --muted: #6e6877;
+    --bg: #17151a;
+    --surface: #211e25;
+    --border: #35313b;
+    --ok: #5cc28d;
+    --error: #e5736b;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
