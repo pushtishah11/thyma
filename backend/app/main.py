@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db import SessionLocal
-from app.routers import health
+from app.routers import health, me, tracked_symptoms
 from app.services.users import get_or_create_dev_user
 
 
@@ -20,3 +20,5 @@ app = FastAPI(title="Thyma", lifespan=lifespan)
 
 # Every route lives under /api, so the Vite dev proxy can forward one prefix.
 app.include_router(health.router, prefix="/api")
+app.include_router(me.router, prefix="/api")
+app.include_router(tracked_symptoms.router, prefix="/api")

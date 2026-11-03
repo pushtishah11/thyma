@@ -12,9 +12,12 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.db import engine
+from app.deps import get_current_user, get_db
+from app.main import app
 from app.models import User
 
 ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
@@ -68,3 +71,18 @@ def other_user(db: Session) -> User:
     db.add(user)
     db.flush()
     return user
+
+
+@pytest.fixture
+def client(db: Session, user: User) -> Iterator[TestClient]:
+    """The API, acting as `user`, inside the rolled-back test session.
+
+    Not entered as a context manager, so the startup step (creating the dev
+    user) doesn't run.
+    """
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: user
+    try:
+        yield TestClient(app)
+    finally:
+        app.dependency_overrides.clear()
