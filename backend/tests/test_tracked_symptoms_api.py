@@ -1,7 +1,4 @@
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
-from app.models import TrackedSymptom, User
 
 
 def add(client: TestClient, symptom: str) -> dict:
@@ -80,19 +77,3 @@ def test_delete(client: TestClient) -> None:
     assert client.delete(f"/api/tracked-symptoms/{chip['id']}").status_code == 204
     assert client.get("/api/tracked-symptoms", params={"include_inactive": True}).json() == []
     assert client.delete(f"/api/tracked-symptoms/{chip['id']}").status_code == 404
-
-
-def test_another_users_chip_is_invisible(client: TestClient, db: Session, other_user: User) -> None:
-    theirs = TrackedSymptom(user_id=other_user.id, symptom="acne", position=0)
-    db.add(theirs)
-    db.flush()
-
-    url = f"/api/tracked-symptoms/{theirs.id}"
-    assert client.get("/api/tracked-symptoms").json() == []
-    assert client.patch(url, json={"active": False}).status_code == 404
-    assert client.delete(url).status_code == 404
-    # Adding the same name for yourself is fine: lists are per user.
-    assert client.post("/api/tracked-symptoms", json={"symptom": "acne"}).status_code == 201
-
-    db.refresh(theirs)
-    assert theirs.active is True

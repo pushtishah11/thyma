@@ -1,10 +1,18 @@
 """Request and response shapes for the API (Pydantic v2)."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+)
 
 from app.services.symptoms import normalize_symptom
 
@@ -69,3 +77,56 @@ class TrackedSymptomPatch(BaseModel):
 
     position: Annotated[int, Field(ge=0)] | None = None
     active: bool | None = None
+
+
+Rating = Annotated[int, Field(ge=1, le=5)]
+Severity = Annotated[int, Field(ge=1, le=3)]
+
+
+class LogSymptomIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    symptom: SymptomName
+    severity: Severity
+
+
+class LogIn(BaseModel):
+    """The whole log for one day. PUT replaces it: a field left out is cleared."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    energy: Rating | None = None
+    mood: Rating | None = None
+    sleep_hours: Annotated[Decimal, Field(ge=0, le=24, decimal_places=1)] | None = None
+    weight: Annotated[Decimal, Field(gt=0, le=1000)] | None = None
+    notes: Annotated[str, StringConstraints(max_length=2000)] | None = None
+    symptoms: list[LogSymptomIn] = []
+
+    @field_validator("symptoms")
+    @classmethod
+    def no_duplicate_symptoms(cls, symptoms: list[LogSymptomIn]) -> list[LogSymptomIn]:
+        names = [s.symptom for s in symptoms]
+        if len(names) != len(set(names)):
+            raise ValueError("each symptom can only appear once per day")
+        return symptoms
+
+
+class LogSymptomOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    symptom: str
+    severity: int
+
+
+class LogOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    date: date
+    energy: int | None
+    mood: int | None
+    # float, not Decimal: Pydantic would send a Decimal as a JSON string.
+    sleep_hours: float | None
+    weight: float | None
+    notes: str | None
+    symptoms: list[LogSymptomOut]
+    updated_at: datetime
