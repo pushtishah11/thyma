@@ -46,6 +46,14 @@ def test_a_cannot_delete_bs_log(client: TestClient, db: Session, b_log: DailyLog
     assert db.get(DailyLog, b_log.id) is not None
 
 
+def test_bs_logs_never_count_in_as_trends(client: TestClient, b_log: DailyLog) -> None:
+    body = client.get("/api/trends", params={"start": "2026-01-15", "end": "2026-01-15"}).json()
+
+    assert body["days_logged"] == 0
+    assert body["symptoms"] == []
+    assert body["daily"][0]["energy"] is None
+
+
 def test_a_cannot_see_or_change_bs_chips(client: TestClient, db: Session, other_user: User) -> None:
     chip = TrackedSymptom(user_id=other_user.id, symptom="acne", position=0)
     db.add(chip)

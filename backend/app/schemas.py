@@ -130,3 +130,33 @@ class LogOut(BaseModel):
     notes: str | None
     symptoms: list[LogSymptomOut]
     updated_at: datetime
+
+
+class DayPointOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    date: date
+    logged: bool
+    energy: int | None
+    mood: int | None
+    sleep_hours: float | None
+
+
+class SymptomTrendOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    symptom: str
+    days: int
+    percent_of_logged_days: int
+    avg_severity: float
+
+
+class TrendsOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start: date
+    end: date
+    days_in_range: int
+    days_logged: int
+    daily: list[DayPointOut]
+    symptoms: list[SymptomTrendOut]
