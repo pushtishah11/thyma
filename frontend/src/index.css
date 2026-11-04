@@ -14,6 +14,10 @@
   --sev-1: #efe7f8;
   --sev-2: #d6c3ee;
   --sev-3: #b796e0;
+  /* Chart series: validated for colorblind separation on these surfaces. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --grid: #ecebe8;
 
   font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
@@ -37,6 +41,9 @@
     --sev-1: #322a3d;
     --sev-2: #4b3a63;
     --sev-3: #6b4f91;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --grid: #2c2930;
   }
 }
 

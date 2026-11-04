@@ -1,6 +1,6 @@
 // Every request to the backend goes through this file.
 
-import type { Health, Log, LogInput, Me, MePatch, TrackedSymptom } from './types'
+import type { Health, Log, LogInput, Me, MePatch, TrackedSymptom, Trends } from './types'
 
 export class ApiError extends Error {
   status: number
@@ -60,3 +60,6 @@ export const getLogs = (start: string, end: string) =>
 
 export const putLog = (date: string, log: LogInput) =>
   request<Log>(`/logs/${date}`, { method: 'PUT', body: JSON.stringify(log) })
+
+export const getTrends = (start: string, end: string) =>
+  request<Trends>(`/trends?${new URLSearchParams({ start, end })}`)

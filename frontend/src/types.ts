@@ -59,3 +59,27 @@ export type LogInput = {
   notes: string | null
   symptoms: LogSymptom[]
 }
+
+export type DayPoint = {
+  date: string
+  logged: boolean
+  energy: number | null
+  mood: number | null
+  sleep_hours: number | null
+}
+
+export type SymptomTrend = {
+  symptom: string
+  days: number
+  percent_of_logged_days: number
+  avg_severity: number
+}
+
+export type Trends = {
+  start: string
+  end: string
+  days_in_range: number
+  days_logged: number
+  daily: DayPoint[]
+  symptoms: SymptomTrend[]
+}
