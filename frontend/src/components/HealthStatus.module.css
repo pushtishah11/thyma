@@ -1,0 +1,44 @@
+.card {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+}
+
+.cardTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--text-strong);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status[data-status='ok'] .dot {
+  background: var(--ok);
+}
+
+.status[data-status='error'] {
+  color: var(--error);
+}
+
+.status[data-status='error'] .dot {
+  background: var(--error);
+}

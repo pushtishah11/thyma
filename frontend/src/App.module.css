@@ -1,60 +1,47 @@
-.page {
-  max-width: 32rem;
+.shell {
+  max-width: 36rem;
   margin: 0 auto;
-  padding: 4rem 1rem;
+  padding: 0 1rem 4rem;
 }
 
-.title {
-  margin: 0;
-  font-size: 2rem;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.25rem;
   color: var(--text-strong);
 }
 
-.tagline {
-  margin: 0.25rem 0 2rem;
+.nav {
+  display: flex;
+  gap: 0.25rem;
 }
 
-.card {
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
+.navLink {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.navLink:hover {
   background: var(--surface);
 }
 
-.cardTitle {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
+.active {
+  background: var(--accent-soft);
   color: var(--text-strong);
+  font-weight: 600;
 }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-top: 1px solid var(--border);
-}
-
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: var(--muted);
-}
-
-.status[data-status='ok'] .dot {
-  background: var(--ok);
-}
-
-.status[data-status='error'] {
-  color: var(--error);
-}
-
-.status[data-status='error'] .dot {
-  background: var(--error);
+.main {
+  display: grid;
+  gap: 1rem;
 }

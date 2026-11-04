@@ -1,68 +1,35 @@
-import { useEffect, useState } from 'react'
+import { NavLink, Navigate, Route, Routes } from 'react-router'
 
-import { getHealth } from './api'
 import styles from './App.module.css'
-import type { Health } from './types'
+import Settings from './pages/Settings'
+import Today from './pages/Today'
 
-type HealthState =
-  | { kind: 'loading' }
-  | { kind: 'loaded'; health: Health }
-  | { kind: 'unreachable' }
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
 
 function App() {
-  const [state, setState] = useState<HealthState>({ kind: 'loading' })
-
-  useEffect(() => {
-    // Ignore a response that arrives after the component is gone.
-    let active = true
-    getHealth()
-      .then((health) => active && setState({ kind: 'loaded', health }))
-      .catch(() => active && setState({ kind: 'unreachable' }))
-    return () => {
-      active = false
-    }
-  }, [])
-
   return (
-    <main className={styles.page}>
-      <h1 className={styles.title}>Thyma</h1>
-      <p className={styles.tagline}>A health record for PCOS and thyroid conditions.</p>
+    <div className={styles.shell}>
+      <header className={styles.header}>
+        <span className={styles.brand}>Thyma</span>
+        <nav className={styles.nav}>
+          <NavLink to="/today" className={navClass}>
+            Today
+          </NavLink>
+          <NavLink to="/settings" className={navClass}>
+            Settings
+          </NavLink>
+        </nav>
+      </header>
 
-      <section className={styles.card} aria-live="polite">
-        <h2 className={styles.cardTitle}>System status</h2>
-        <StatusRow label="API" status={apiStatus(state)} />
-        <StatusRow label="Database" status={dbStatus(state)} />
-      </section>
-    </main>
-  )
-}
-
-type Status = 'checking' | 'ok' | 'error'
-
-function apiStatus(state: HealthState): Status {
-  if (state.kind === 'loading') return 'checking'
-  return state.kind === 'loaded' ? 'ok' : 'error'
-}
-
-function dbStatus(state: HealthState): Status {
-  if (state.kind === 'loading') return 'checking'
-  return state.kind === 'loaded' && state.health.db === 'ok' ? 'ok' : 'error'
-}
-
-const STATUS_TEXT: Record<Status, string> = {
-  checking: 'Checking…',
-  ok: 'OK',
-  error: 'Unreachable',
-}
-
-function StatusRow({ label, status }: { label: string; status: Status }) {
-  return (
-    <div className={styles.row}>
-      <span>{label}</span>
-      <span className={styles.status} data-status={status}>
-        <span className={styles.dot} aria-hidden="true" />
-        {STATUS_TEXT[status]}
-      </span>
+      <main className={styles.main}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/today" replace />} />
+          <Route path="/today" element={<Today />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<p>That page doesn't exist.</p>} />
+        </Routes>
+      </main>
     </div>
   )
 }
