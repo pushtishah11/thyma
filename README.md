@@ -9,12 +9,12 @@ one place, and Thyma turns them into a one-page summary a doctor can read in two
 minutes. It doesn't assume a 28-day cycle, it doesn't predict fertility, and it
 never diagnoses: it only describes what you logged.
 
-> **Status:** early development (milestone M0: project setup).
+> **Status:** early development (milestone M1: daily logging and trends).
 
 ## Stack
 
 - **Backend:** Python 3.12, FastAPI, SQLAlchemy 2, Alembic, PostgreSQL 16
-- **Frontend:** React + TypeScript, Vite
+- **Frontend:** React + TypeScript, Vite, React Router, Recharts
 - **Tests and lint:** pytest, ruff, ESLint, GitHub Actions
 
 ## Running it locally
@@ -48,8 +48,17 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The status card should show both the API and the
-database as OK.
+Open http://localhost:5173. Pick your conditions under **Settings** to get a
+starting list of symptom chips, then log a day on **Today**.
+
+**Optional: fill in two weeks of synthetic data** (from `backend/`)
+
+```bash
+.venv/bin/python -m scripts.seed
+```
+
+It refuses to run if the dev user already has logs, so it never mixes made-up
+days into real ones. `--reset` deletes **all** of the dev user's logs first.
 
 Settings come from environment variables, and the defaults match
 `docker-compose.yml`, so no `.env` file is needed for local development. To
@@ -78,9 +87,12 @@ migrations on every run, so they never touch your real data.
 backend/
   app/          FastAPI app: config, db, models, routers, services
   alembic/      database migrations
+  scripts/      seed.py: synthetic demo data
   tests/        pytest suite
 frontend/
   src/          React app; all API calls go through src/api.ts
+    pages/      Today, Trends, Settings
+    components/ RatingPicker, SymptomChip, HealthStatus
 docker-compose.yml
 ```
 
