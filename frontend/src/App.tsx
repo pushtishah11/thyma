@@ -8,10 +8,12 @@ import Today from './pages/Today'
 
 // Trends pulls in Recharts (large), so it's loaded only when you open it.
 const Trends = lazy(() => import('./pages/Trends'))
+const Cycles = lazy(() => import('./pages/Cycles'))
 
 const TABS: { to: string; label: string; icon: IconName }[] = [
   { to: '/today', label: 'Today', icon: 'today' },
   { to: '/trends', label: 'Trends', icon: 'trends' },
+  { to: '/cycles', label: 'Cycles', icon: 'drop' },
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ]
 
@@ -48,6 +50,14 @@ function App() {
             element={
               <Suspense fallback={<p className={styles.loading}>Loading…</p>}>
                 <Trends />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/cycles"
+            element={
+              <Suspense fallback={<p className={styles.loading}>Loading…</p>}>
+                <Cycles />
               </Suspense>
             }
           />

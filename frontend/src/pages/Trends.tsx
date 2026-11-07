@@ -15,29 +15,15 @@ import {
 } from 'recharts'
 
 import { getTrends } from '../api'
+import { AXIS, TOOLTIP } from '../charts'
 import Icon, { type IconName } from '../components/Icon'
-import { addDays, fromIso, todayIso } from '../dates'
+import { addDays, shortDate, todayIso } from '../dates'
 import ui from '../styles/ui.module.css'
 import type { Trends as TrendsData } from '../types'
 import styles from './Trends.module.css'
 
 const RANGES = [30, 90, 180] as const
 type Range = (typeof RANGES)[number]
-
-// Shared chart styling: recessive grid and axes, text in text colors.
-const AXIS = { stroke: 'var(--border)', tick: { fill: 'var(--muted)', fontSize: 12 } }
-const TOOLTIP = {
-  contentStyle: {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    color: 'var(--text)',
-  },
-  labelStyle: { color: 'var(--text-strong)', fontWeight: 600 },
-}
-
-const shortDate = (iso: string) =>
-  fromIso(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 
 export default function Trends() {
   const [range, setRange] = useState<Range>(30)

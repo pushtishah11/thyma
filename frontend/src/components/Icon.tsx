@@ -19,6 +19,11 @@ const PATHS = {
   pulse: 'M3 12h4l2-5 4 10 2-5h6',
   spark: 'M12 3v4 M12 17v4 M3 12h4 M17 12h4 M6 6l2.5 2.5 M15.5 15.5 18 18 M6 18l2.5-2.5 M15.5 8.5 18 6',
   close: 'M6 6l12 12 M18 6 6 18',
+  cycle: 'M12 3a9 9 0 1 1-9 9 M12 3v4 M12 3H8 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+  drop: 'M12 3c-3.5 4.5-6 7.8-6 11a6 6 0 0 0 12 0c0-3.2-2.5-6.5-6-11Z',
+  edit: 'M4 20h4L19 9l-4-4L4 16Z M13.5 6.5l4 4',
+  trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
+  calendar: 'M4 6h16v14H4Z M4 10h16 M8 3v4 M16 3v4',
 } as const
 
 export type IconName = keyof typeof PATHS

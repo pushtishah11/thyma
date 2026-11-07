@@ -86,3 +86,36 @@ export type Trends = {
   daily: DayPoint[]
   symptoms: SymptomTrend[]
 }
+
+export type Cycle = {
+  id: string
+  start_date: string
+  end_date: string | null
+  notes: string | null
+}
+
+export type CycleInput = {
+  start_date: string
+  end_date: string | null
+  notes: string | null
+}
+
+export type CycleStat = {
+  start_date: string
+  end_date: string | null
+  length_days: number | null
+  period_days: number | null
+  long_gap: boolean
+}
+
+export type CycleSummary = {
+  cycles: CycleStat[]
+  completed_count: number
+  mean_length: number | null
+  min_length: number | null
+  max_length: number | null
+  last_start: string | null
+  days_since_last_start: number | null
+  gap_threshold: number
+  current_gap_over_threshold: boolean
+}

@@ -30,3 +30,12 @@ export function formatLong(iso: string): string {
     day: 'numeric',
   })
 }
+
+export function shortDate(iso: string): string {
+  return fromIso(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+// Whole days from one ISO date to another (b - a).
+export function daysBetween(a: string, b: string): number {
+  return Math.round((fromIso(b).getTime() - fromIso(a).getTime()) / 86_400_000)
+}

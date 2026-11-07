@@ -1,6 +1,17 @@
 // Every request to the backend goes through this file.
 
-import type { Health, Log, LogInput, Me, MePatch, TrackedSymptom, Trends } from './types'
+import type {
+  Cycle,
+  CycleInput,
+  CycleSummary,
+  Health,
+  Log,
+  LogInput,
+  Me,
+  MePatch,
+  TrackedSymptom,
+  Trends,
+} from './types'
 
 export class ApiError extends Error {
   status: number
@@ -69,3 +80,18 @@ export const addTrackedSymptom = (symptom: string) =>
     method: 'POST',
     body: JSON.stringify({ symptom }),
   })
+
+export const getCycles = () => request<Cycle[]>('/cycles')
+
+export const getCycleSummary = (gapThreshold: number, today: string) =>
+  request<CycleSummary>(
+    `/cycles/summary?${new URLSearchParams({ gap_threshold: String(gapThreshold), today })}`,
+  )
+
+export const addCycle = (cycle: CycleInput) =>
+  request<Cycle>('/cycles', { method: 'POST', body: JSON.stringify(cycle) })
+
+export const patchCycle = (id: string, changes: Partial<CycleInput>) =>
+  request<Cycle>(`/cycles/${id}`, { method: 'PATCH', body: JSON.stringify(changes) })
+
+export const deleteCycle = (id: string) => request<void>(`/cycles/${id}`, { method: 'DELETE' })
