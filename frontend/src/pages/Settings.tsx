@@ -2,12 +2,22 @@ import { useEffect, useState } from 'react'
 
 import { getMe, patchMe } from '../api'
 import HealthStatus from '../components/HealthStatus'
+import Icon from '../components/Icon'
+import ui from '../styles/ui.module.css'
 import type { Condition, Me } from '../types'
 import styles from './Settings.module.css'
 
-const CONDITIONS: { key: Condition; label: string }[] = [
-  { key: 'pcos', label: 'PCOS' },
-  { key: 'thyroid', label: "Thyroid (Hashimoto's, hypothyroidism)" },
+const CONDITIONS: { key: Condition; label: string; detail: string }[] = [
+  {
+    key: 'pcos',
+    label: 'PCOS',
+    detail: 'Adds acne, hair thinning, excess hair growth, cravings, bloating, fatigue',
+  },
+  {
+    key: 'thyroid',
+    label: 'Thyroid',
+    detail: "Hashimoto's or hypothyroidism. Adds fatigue, cold intolerance, brain fog, and more",
+  },
 ]
 
 export default function Settings() {
@@ -25,8 +35,9 @@ export default function Settings() {
     }
   }, [])
 
-  async function toggleCondition(key: Condition, on: boolean) {
+  async function toggleCondition(key: Condition) {
     if (!me) return
+    const on = !me.conditions.includes(key)
     const conditions = on ? [...me.conditions, key] : me.conditions.filter((c) => c !== key)
     setSaving(true)
     setError(null)
@@ -41,29 +52,48 @@ export default function Settings() {
 
   return (
     <>
-      <h1 className={styles.title}>Settings</h1>
+      <div>
+        <h1 className={ui.pageTitle}>Settings</h1>
+        <p className={ui.pageSub}>Make Thyma fit what you're tracking</p>
+      </div>
 
-      <section className={styles.card}>
-        <h2 className={styles.cardTitle}>Your conditions</h2>
-        <p className={styles.hint}>
-          These pick the starting symptom chips on the Today page. Unticking one keeps the chips you
-          already have, so your history stays intact.
+      <section className={ui.card}>
+        <div className={ui.cardHead}>
+          <h2 className={ui.cardTitle}>Your conditions</h2>
+        </div>
+        <p className={`${ui.hint} ${styles.intro}`}>
+          These pick your starting symptom chips. Turning one off keeps the chips you already have,
+          so your history stays intact.
         </p>
-        {me === null && !error && <p className={styles.hint}>Loading…</p>}
-        {me &&
-          CONDITIONS.map(({ key, label }) => (
-            <label key={key} className={styles.check}>
-              <input
-                type="checkbox"
-                checked={me.conditions.includes(key)}
-                disabled={saving}
-                onChange={(e) => toggleCondition(key, e.target.checked)}
-              />
-              {label}
-            </label>
-          ))}
+        {me === null && !error && <p className={ui.hint}>Loading…</p>}
+        {me && (
+          <div className={styles.options}>
+            {CONDITIONS.map(({ key, label, detail }) => {
+              const on = me.conditions.includes(key)
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="switch"
+                  aria-checked={on}
+                  className={styles.option}
+                  disabled={saving}
+                  onClick={() => toggleCondition(key)}
+                >
+                  <span className={styles.check} aria-hidden="true">
+                    {on && <Icon name="check" size={16} />}
+                  </span>
+                  <span className={styles.text}>
+                    <span className={styles.optionLabel}>{label}</span>
+                    <span className={styles.optionDetail}>{detail}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
         {error && (
-          <p className={styles.error} role="alert">
+          <p className={ui.error} role="alert">
             {error}
           </p>
         )}

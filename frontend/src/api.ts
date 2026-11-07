@@ -63,3 +63,9 @@ export const putLog = (date: string, log: LogInput) =>
 
 export const getTrends = (start: string, end: string) =>
   request<Trends>(`/trends?${new URLSearchParams({ start, end })}`)
+
+export const addTrackedSymptom = (symptom: string) =>
+  request<TrackedSymptom>('/tracked-symptoms', {
+    method: 'POST',
+    body: JSON.stringify({ symptom }),
+  })

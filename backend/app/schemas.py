@@ -158,5 +158,8 @@ class TrendsOut(BaseModel):
     end: date
     days_in_range: int
     days_logged: int
+    avg_energy: float | None
+    avg_mood: float | None
+    avg_sleep_hours: float | None
     daily: list[DayPointOut]
     symptoms: list[SymptomTrendOut]

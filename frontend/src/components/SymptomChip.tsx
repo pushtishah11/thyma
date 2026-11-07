@@ -17,13 +17,15 @@ export default function SymptomChip({ name, severity, onTap }: Props) {
       className={styles.chip}
       data-severity={severity ?? 0}
       aria-label={word ? `${name}, ${word}` : `${name}, not logged`}
+      title={word ?? 'Tap to log'}
       onClick={onTap}
     >
       <span>{name}</span>
       {severity && (
         <span className={styles.dots} aria-hidden="true">
-          {'●'.repeat(severity)}
-          <span className={styles.empty}>{'●'.repeat(3 - severity)}</span>
+          {[1, 2, 3].map((n) => (
+            <span key={n} className={n <= severity ? styles.dot : `${styles.dot} ${styles.off}`} />
+          ))}
         </span>
       )}
     </button>

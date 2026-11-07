@@ -1,40 +1,54 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   min-height: 2.5rem;
-  padding: 0.35rem 0.85rem;
+  padding: 0.35rem 0.95rem;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--bg);
+  background: var(--field);
+  color: var(--text);
+}
+
+.chip:hover {
+  border-color: var(--accent);
 }
 
 .chip[data-severity='1'] {
   background: var(--sev-1);
   border-color: var(--sev-2);
+  color: var(--text-strong);
 }
 
 .chip[data-severity='2'] {
   background: var(--sev-2);
   border-color: var(--sev-3);
+  color: var(--text-strong);
 }
 
 .chip[data-severity='3'] {
   background: var(--sev-3);
   border-color: var(--accent);
   color: var(--text-strong);
+  font-weight: 600;
 }
 
 .dots {
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  color: var(--accent);
+  display: inline-flex;
+  gap: 2px;
 }
 
-.chip[data-severity='3'] .dots {
-  color: var(--text-strong);
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
-.empty {
-  opacity: 0.3;
+.chip[data-severity='3'] .dot {
+  background: var(--text-strong);
+}
+
+.off {
+  opacity: 0.25;
 }

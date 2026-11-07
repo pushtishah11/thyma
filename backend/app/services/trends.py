@@ -39,8 +39,18 @@ class Trends:
     end: date
     days_in_range: int
     days_logged: int
+    # Averages over the days that have a value, rounded to one decimal; None if none do.
+    avg_energy: float | None
+    avg_mood: float | None
+    avg_sleep_hours: float | None
     daily: list[DayPoint]
     symptoms: list[SymptomTrend]
+
+
+def _average(values: Iterable[float | None]) -> float | None:
+    """Mean of the values that aren't None, to one decimal. None if there are none."""
+    present = [v for v in values if v is not None]
+    return round(sum(present) / len(present), 1) if present else None
 
 
 def compute_trends(logs: Iterable[DailyLog], start: date, end: date) -> Trends:
@@ -86,6 +96,9 @@ def compute_trends(logs: Iterable[DailyLog], start: date, end: date) -> Trends:
         end=end,
         days_in_range=len(daily),
         days_logged=days_logged,
+        avg_energy=_average(d.energy for d in daily),
+        avg_mood=_average(d.mood for d in daily),
+        avg_sleep_hours=_average(d.sleep_hours for d in daily),
         daily=daily,
         symptoms=symptoms,
     )

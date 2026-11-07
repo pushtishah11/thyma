@@ -95,3 +95,22 @@ def test_single_day_range() -> None:
     trends = compute_trends([log("2026-01-01", energy=5)], START, START)
 
     assert (trends.days_in_range, trends.days_logged) == (1, 1)
+
+
+def test_averages_skip_missing_values() -> None:
+    logs = [
+        log("2026-01-01", energy=2, mood=3, sleep="6.5"),
+        log("2026-01-02", energy=3, sleep="7"),
+        log("2026-01-03", energy=3),
+    ]
+
+    trends = compute_trends(logs, START, END)
+
+    # energy (2+3+3)/3 = 2.67; mood only logged once; sleep (6.5+7)/2 = 6.75
+    assert (trends.avg_energy, trends.avg_mood, trends.avg_sleep_hours) == (2.7, 3.0, 6.8)
+
+
+def test_averages_are_none_with_nothing_logged() -> None:
+    trends = compute_trends([log("2026-01-01")], START, END)
+
+    assert (trends.avg_energy, trends.avg_mood, trends.avg_sleep_hours) == (None, None, None)

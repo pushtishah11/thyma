@@ -1,41 +1,66 @@
-.title {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--text-strong);
+.intro {
+  margin-bottom: 0.9rem;
 }
 
-.card {
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: var(--surface);
+.options {
+  display: grid;
+  gap: 0.6rem;
 }
 
-.cardTitle {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  color: var(--text-strong);
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--field);
+  text-align: left;
 }
 
-.hint {
-  margin: 0 0 0.75rem;
-  font-size: 0.9rem;
+.option:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.option[aria-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.option:disabled {
+  opacity: 0.7;
 }
 
 .check {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.4rem 0;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--surface);
+  color: var(--on-accent);
 }
 
-.check input {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--accent);
+.option[aria-checked='true'] .check {
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
-.error {
-  margin: 0.5rem 0 0;
-  color: var(--error);
+.text {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.optionLabel {
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.optionDetail {
+  font-size: 0.85rem;
+  color: var(--muted);
 }

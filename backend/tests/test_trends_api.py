@@ -24,6 +24,7 @@ def test_trends_combines_daily_series_and_symptoms(client: TestClient) -> None:
     body = trends(client, "2026-01-01", "2026-01-03")
 
     assert (body["days_in_range"], body["days_logged"]) == (3, 2)
+    assert (body["avg_energy"], body["avg_mood"], body["avg_sleep_hours"]) == (3.0, None, 6.5)
     assert body["daily"] == [
         {"date": "2026-01-01", "logged": True, "energy": 2, "mood": None, "sleep_hours": 6.5},
         {"date": "2026-01-02", "logged": False, "energy": None, "mood": None, "sleep_hours": None},

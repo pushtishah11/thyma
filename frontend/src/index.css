@@ -21,6 +21,11 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --grid: #e3eeef;
+  --field: #f5fafa;
+  --shadow: 0 1px 2px rgb(18 49 58 / 6%), 0 4px 16px rgb(18 49 58 / 6%);
+  --shadow-lift: 0 2px 6px rgb(18 49 58 / 10%), 0 12px 32px rgb(18 49 58 / 12%);
+  --radius: 14px;
+  --page-glow: radial-gradient(1200px 500px at 50% -200px, #d3eef1 0%, transparent 70%);
 
   font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
@@ -49,12 +54,23 @@
     --series-1: #3987e5;
     --series-2: #d95926;
     --grid: #1d454e;
+    --field: #10313a;
+    --shadow: 0 1px 2px rgb(0 0 0 / 20%), 0 4px 16px rgb(0 0 0 / 18%);
+    --shadow-lift: 0 2px 6px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 30%);
+    --page-glow: radial-gradient(1200px 500px at 50% -200px, #18505a 0%, transparent 70%);
   }
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  background: var(--page-glow) no-repeat, var(--bg);
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
 }
 
 button,
@@ -71,4 +87,30 @@ button {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* Gentle press feedback on every button, like a native app. */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+button {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.08s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+  button:not(:disabled):active {
+    transform: none;
+  }
 }

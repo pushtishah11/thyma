@@ -80,6 +80,9 @@ export type Trends = {
   end: string
   days_in_range: number
   days_logged: number
+  avg_energy: number | null
+  avg_mood: number | null
+  avg_sleep_hours: number | null
   daily: DayPoint[]
   symptoms: SymptomTrend[]
 }

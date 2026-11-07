@@ -1,13 +1,15 @@
 .card {
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
   background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .cardTitle {
   margin: 0 0 0.5rem;
   font-size: 1rem;
+  font-weight: 650;
   color: var(--text-strong);
 }
 

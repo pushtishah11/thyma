@@ -2,30 +2,40 @@ import { lazy, Suspense } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router'
 
 import styles from './App.module.css'
+import Icon, { type IconName } from './components/Icon'
 import Settings from './pages/Settings'
 import Today from './pages/Today'
 
 // Trends pulls in Recharts (large), so it's loaded only when you open it.
 const Trends = lazy(() => import('./pages/Trends'))
 
-const navClass = ({ isActive }: { isActive: boolean }) =>
-  isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+const TABS: { to: string; label: string; icon: IconName }[] = [
+  { to: '/today', label: 'Today', icon: 'today' },
+  { to: '/trends', label: 'Trends', icon: 'trends' },
+  { to: '/settings', label: 'Settings', icon: 'settings' },
+]
+
+const tabClass = ({ isActive }: { isActive: boolean }) =>
+  isActive ? `${styles.tab} ${styles.active}` : styles.tab
 
 function App() {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <span className={styles.brand}>Thyma</span>
-        <nav className={styles.nav}>
-          <NavLink to="/today" className={navClass}>
-            Today
-          </NavLink>
-          <NavLink to="/trends" className={navClass}>
-            Trends
-          </NavLink>
-          <NavLink to="/settings" className={navClass}>
-            Settings
-          </NavLink>
+        <NavLink to="/today" className={styles.brand}>
+          <span className={styles.logo}>
+            <Icon name="logo" size={20} />
+          </span>
+          Thyma
+        </NavLink>
+        {/* On a phone this same nav becomes a tab bar fixed to the bottom of the screen. */}
+        <nav className={styles.nav} aria-label="Main">
+          {TABS.map((t) => (
+            <NavLink key={t.to} to={t.to} className={tabClass}>
+              <Icon name={t.icon} size={20} />
+              <span>{t.label}</span>
+            </NavLink>
+          ))}
         </nav>
       </header>
 
@@ -36,7 +46,7 @@ function App() {
           <Route
             path="/trends"
             element={
-              <Suspense fallback={<p>Loading…</p>}>
+              <Suspense fallback={<p className={styles.loading}>Loading…</p>}>
                 <Trends />
               </Suspense>
             }

@@ -15,7 +15,9 @@ import {
 } from 'recharts'
 
 import { getTrends } from '../api'
+import Icon, { type IconName } from '../components/Icon'
 import { addDays, fromIso, todayIso } from '../dates'
+import ui from '../styles/ui.module.css'
 import type { Trends as TrendsData } from '../types'
 import styles from './Trends.module.css'
 
@@ -64,7 +66,10 @@ export default function Trends() {
   return (
     <>
       <div className={styles.head}>
-        <h1 className={styles.title}>Trends</h1>
+        <div>
+          <h1 className={ui.pageTitle}>Trends</h1>
+          <p className={ui.pageSub}>Patterns in what you've logged</p>
+        </div>
         <div className={styles.toggle} role="group" aria-label="Date range">
           {RANGES.map((r) => (
             <button
@@ -81,19 +86,20 @@ export default function Trends() {
       </div>
 
       {failed && (
-        <div className={styles.card} role="alert">
-          <p className={styles.error}>{error.message}</p>
-          <button type="button" className={styles.secondary} onClick={() => setRetry((n) => n + 1)}>
+        <div className={ui.card} role="alert">
+          <p className={ui.error}>{error.message}</p>
+          <button type="button" className={ui.secondary} onClick={() => setRetry((n) => n + 1)}>
             Try again
           </button>
         </div>
       )}
 
-      {!trends && !failed && <p className={styles.subtle}>Loading…</p>}
+      {!trends && !failed && <p className={ui.hint}>Loading…</p>}
 
       {trends && trends.days_logged === 0 && (
-        <div className={styles.card}>
-          <p className={styles.subtle}>
+        <div className={`${ui.card} ${ui.empty}`}>
+          <Icon name="trends" size={32} />
+          <p>
             Nothing logged in the last {range} days. <Link to="/today">Log a day</Link> and your
             trends will show up here.
           </p>
@@ -111,14 +117,15 @@ function Charts({ trends }: { trends: TrendsData }) {
 
   return (
     <>
-      <p className={styles.subtle}>
-        You logged {trends.days_logged} of {trends.days_in_range} days. Gaps in the lines are days
-        with no log.
-      </p>
+      <Tiles trends={trends} />
 
-      <section className={styles.card}>
-        <h2 className={styles.cardTitle}>Energy and mood</h2>
-        <p className={styles.caption}>1 = lowest, 5 = highest</p>
+      <section className={ui.card}>
+        <h2 className={ui.cardTitle}>
+          <Icon name="pulse" /> Energy and mood
+        </h2>
+        <p className={styles.caption}>
+          1 = lowest, 5 = highest. Gaps are days with no log.
+        </p>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={daily} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
             <CartesianGrid stroke="var(--grid)" vertical={false} />
@@ -150,8 +157,10 @@ function Charts({ trends }: { trends: TrendsData }) {
         </ResponsiveContainer>
       </section>
 
-      <section className={styles.card}>
-        <h2 className={styles.cardTitle}>Sleep</h2>
+      <section className={ui.card}>
+        <h2 className={ui.cardTitle}>
+          <Icon name="moon" /> Sleep
+        </h2>
         <p className={styles.caption}>Hours per night</p>
         {hasSleep ? (
           <ResponsiveContainer width="100%" height={200}>
@@ -173,23 +182,62 @@ function Charts({ trends }: { trends: TrendsData }) {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <p className={styles.subtle}>No sleep logged in this range.</p>
+          <p className={ui.hint}>No sleep logged in this range.</p>
         )}
       </section>
 
-      <section className={styles.card}>
-        <h2 className={styles.cardTitle}>Symptoms</h2>
+      <section className={ui.card}>
+        <h2 className={ui.cardTitle}>
+          <Icon name="spark" /> Symptoms
+        </h2>
         <p className={styles.caption}>
           Share of logged days each symptom appeared, with its average severity (1 mild – 3
           severe)
         </p>
         {trends.symptoms.length === 0 ? (
-          <p className={styles.subtle}>No symptoms logged in this range.</p>
+          <p className={ui.hint}>No symptoms logged in this range.</p>
         ) : (
           <SymptomBars trends={trends} />
         )}
       </section>
     </>
+  )
+}
+
+type Tile = { label: string; value: string; detail: string; icon: IconName }
+
+// The headline numbers for the range, straight from the API (already rounded there).
+function Tiles({ trends }: { trends: TrendsData }) {
+  const fmt = (v: number | null) => (v === null ? '–' : v.toFixed(1))
+  const tiles: Tile[] = [
+    {
+      label: 'Days logged',
+      value: `${trends.days_logged}`,
+      detail: `of ${trends.days_in_range}`,
+      icon: 'today',
+    },
+    { label: 'Avg energy', value: fmt(trends.avg_energy), detail: 'out of 5', icon: 'pulse' },
+    { label: 'Avg mood', value: fmt(trends.avg_mood), detail: 'out of 5', icon: 'spark' },
+    {
+      label: 'Avg sleep',
+      value: fmt(trends.avg_sleep_hours),
+      detail: 'hours',
+      icon: 'moon',
+    },
+  ]
+  return (
+    <div className={styles.tiles}>
+      {tiles.map((t) => (
+        <div key={t.label} className={styles.tile}>
+          <span className={styles.tileLabel}>
+            <Icon name={t.icon} size={15} /> {t.label}
+          </span>
+          <span className={styles.tileValue}>
+            {t.value} <span className={styles.tileDetail}>{t.detail}</span>
+          </span>
+        </div>
+      ))}
+    </div>
   )
 }
 
