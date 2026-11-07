@@ -139,107 +139,111 @@ function Charts({ trends, markers }: { trends: TrendsData; markers: Marker[] }) 
     <>
       <Tiles trends={trends} />
 
-      <section className={ui.card}>
-        <h2 className={ui.cardTitle}>
-          <Icon name="pulse" /> Energy and mood
-        </h2>
-        <p className={styles.caption}>
-          1 = lowest, 5 = highest. Gaps are days with no log.
-        </p>
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={daily} margin={{ top: 16, right: 8, bottom: 0, left: -24 }}>
-            <CartesianGrid stroke="var(--grid)" vertical={false} />
-            <XAxis dataKey="label" {...AXIS} minTickGap={24} />
-            <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} {...AXIS} />
-            <Tooltip {...TOOLTIP} />
-            <Legend wrapperStyle={{ fontSize: 13, color: 'var(--text)' }} />
-            {MarkerLines({ markers })}
-            <Line
-              name="Energy"
-              dataKey="energy"
-              stroke="var(--series-1)"
-              strokeWidth={2}
-              dot={{ r: 3.5, fill: 'var(--series-1)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
-              activeDot={{ r: 5, stroke: 'var(--surface)', strokeWidth: 2 }}
-              connectNulls={false}
-              isAnimationActive={false}
-            />
-            <Line
-              name="Mood"
-              dataKey="mood"
-              stroke="var(--series-2)"
-              strokeWidth={2}
-              dot={{ r: 3.5, fill: 'var(--series-2)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
-              activeDot={{ r: 5, stroke: 'var(--surface)', strokeWidth: 2 }}
-              connectNulls={false}
-              isAnimationActive={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </section>
-
-      <section className={ui.card}>
-        <h2 className={ui.cardTitle}>
-          <Icon name="moon" /> Sleep
-        </h2>
-        <p className={styles.caption}>Hours per night</p>
-        {hasSleep ? (
-          <ResponsiveContainer width="100%" height={200}>
+      <div className={ui.pair}>
+        <section className={ui.card}>
+          <h2 className={ui.cardTitle}>
+            <Icon name="pulse" /> Energy and mood
+          </h2>
+          <p className={styles.caption}>
+            1 = lowest, 5 = highest. Gaps are days with no log.
+          </p>
+          <ResponsiveContainer width="100%" height={220}>
             <LineChart data={daily} margin={{ top: 16, right: 8, bottom: 0, left: -24 }}>
               <CartesianGrid stroke="var(--grid)" vertical={false} />
               <XAxis dataKey="label" {...AXIS} minTickGap={24} />
-              <YAxis domain={[0, 'dataMax + 1']} allowDecimals={false} {...AXIS} />
-              <Tooltip {...TOOLTIP} formatter={(v) => [`${v} h`, 'Sleep']} />
+              <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} {...AXIS} />
+              <Tooltip {...TOOLTIP} />
+              <Legend wrapperStyle={{ fontSize: 13, color: 'var(--text)' }} />
               {MarkerLines({ markers })}
               <Line
-                name="Sleep"
-                dataKey="sleep_hours"
-                stroke="var(--accent)"
+                name="Energy"
+                dataKey="energy"
+                stroke="var(--series-1)"
                 strokeWidth={2}
-                dot={{ r: 3.5, fill: 'var(--accent)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
+                dot={{ r: 3.5, fill: 'var(--series-1)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
+                activeDot={{ r: 5, stroke: 'var(--surface)', strokeWidth: 2 }}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+              <Line
+                name="Mood"
+                dataKey="mood"
+                stroke="var(--series-2)"
+                strokeWidth={2}
+                dot={{ r: 3.5, fill: 'var(--series-2)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
                 activeDot={{ r: 5, stroke: 'var(--surface)', strokeWidth: 2 }}
                 connectNulls={false}
                 isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>
-        ) : (
-          <p className={ui.hint}>No sleep logged in this range.</p>
-        )}
-      </section>
+        </section>
 
-      {markers.length > 0 && (
         <section className={ui.card}>
           <h2 className={ui.cardTitle}>
-            <Icon name="pill" /> Med &amp; supplement changes
+            <Icon name="moon" /> Sleep
           </h2>
-          <p className={styles.caption}>The numbered dashed lines on the charts above.</p>
-          <ol className={styles.markers}>
-            {markers.map((m, i) => (
-              <li key={`${m.date}-${i}`}>
-                <span className={styles.markerNum}>{i + 1}</span>
-                <span>{m.text}</span>
-                <span className={ui.hint}>{shortDate(m.date)}</span>
-              </li>
-            ))}
-          </ol>
+          <p className={styles.caption}>Hours per night</p>
+          {hasSleep ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={daily} margin={{ top: 16, right: 8, bottom: 0, left: -24 }}>
+                <CartesianGrid stroke="var(--grid)" vertical={false} />
+                <XAxis dataKey="label" {...AXIS} minTickGap={24} />
+                <YAxis domain={[0, 'dataMax + 1']} allowDecimals={false} {...AXIS} />
+                <Tooltip {...TOOLTIP} formatter={(v) => [`${v} h`, 'Sleep']} />
+                {MarkerLines({ markers })}
+                <Line
+                  name="Sleep"
+                  dataKey="sleep_hours"
+                  stroke="var(--accent)"
+                  strokeWidth={2}
+                  dot={{ r: 3.5, fill: 'var(--accent)', stroke: 'var(--surface)', strokeWidth: 1.5 }}
+                  activeDot={{ r: 5, stroke: 'var(--surface)', strokeWidth: 2 }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className={ui.hint}>No sleep logged in this range.</p>
+          )}
         </section>
-      )}
+      </div>
 
-      <section className={ui.card}>
-        <h2 className={ui.cardTitle}>
-          <Icon name="spark" /> Symptoms
-        </h2>
-        <p className={styles.caption}>
-          Share of logged days each symptom appeared, with its average severity (1 mild – 3
-          severe)
-        </p>
-        {trends.symptoms.length === 0 ? (
-          <p className={ui.hint}>No symptoms logged in this range.</p>
-        ) : (
-          <SymptomBars trends={trends} />
+      <div className={ui.pair}>
+        <section className={ui.card}>
+          <h2 className={ui.cardTitle}>
+            <Icon name="spark" /> Symptoms
+          </h2>
+          <p className={styles.caption}>
+            Share of logged days each symptom appeared, with its average severity (1 mild – 3
+            severe)
+          </p>
+          {trends.symptoms.length === 0 ? (
+            <p className={ui.hint}>No symptoms logged in this range.</p>
+          ) : (
+            <SymptomBars trends={trends} />
+          )}
+        </section>
+
+        {markers.length > 0 && (
+          <section className={ui.card}>
+            <h2 className={ui.cardTitle}>
+              <Icon name="pill" /> Med &amp; supplement changes
+            </h2>
+            <p className={styles.caption}>The numbered dashed lines on the charts above.</p>
+            <ol className={styles.markers}>
+              {markers.map((m, i) => (
+                <li key={`${m.date}-${i}`}>
+                  <span className={styles.markerNum}>{i + 1}</span>
+                  <span>{m.text}</span>
+                  <span className={ui.hint}>{shortDate(m.date)}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
         )}
-      </section>
+      </div>
     </>
   )
 }

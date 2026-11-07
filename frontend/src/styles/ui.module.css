@@ -110,3 +110,23 @@
   color: var(--accent);
   opacity: 0.8;
 }
+
+/* Two cards side by side on a wide screen, stacked otherwise.
+   A lone card in a pair takes the full width. */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+@media (min-width: 1100px) {
+  .pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .pair > :only-child {
+    grid-column: 1 / -1;
+  }
+}

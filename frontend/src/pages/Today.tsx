@@ -229,107 +229,112 @@ export default function Today() {
             onSave()
           }}
         >
-          <section className={ui.card}>
-            <div className={ui.cardHead}>
-              <h2 className={ui.cardTitle}>
-                <Icon name="pulse" /> How you're feeling
-              </h2>
-              {loaded.hasLog && (
-                <span className={styles.badge}>
-                  <Icon name="check" size={14} /> Logged
-                </span>
-              )}
-            </div>
-            <RatingPicker
-              label="Energy"
-              words={ENERGY_WORDS}
-              value={draft.energy}
-              onChange={(energy) => edit({ energy })}
-            />
-            <RatingPicker
-              label="Mood"
-              words={MOOD_WORDS}
-              value={draft.mood}
-              onChange={(mood) => edit({ mood })}
-            />
-          </section>
-
-          <section className={ui.card}>
-            <div className={ui.cardHead}>
-              <h2 className={ui.cardTitle}>
-                <Icon name="spark" /> Symptoms
-                {loggedCount > 0 && <span className={styles.count}>{loggedCount}</span>}
-              </h2>
-              <span className={styles.legend} aria-hidden="true">
-                Tap to cycle
-                <span className={styles.swatch} data-severity="1" /> mild
-                <span className={styles.swatch} data-severity="2" /> moderate
-                <span className={styles.swatch} data-severity="3" /> severe
-              </span>
-            </div>
-            {loaded.chips.length === 0 && (
-              <p className={ui.hint}>
-                No symptoms yet. <Link to="/settings">Pick your conditions</Link> for a starting
-                list, or add your own below.
-              </p>
-            )}
-            <div className={styles.chips}>
-              {loaded.chips.map((name) => (
-                <SymptomChip
-                  key={name}
-                  name={name}
-                  severity={draft.symptoms[name] ?? null}
-                  onTap={() => cycleSymptom(name)}
+          <div className={styles.columns}>
+            <div className={styles.column}>
+              <section className={ui.card}>
+                <div className={ui.cardHead}>
+                  <h2 className={ui.cardTitle}>
+                    <Icon name="pulse" /> How you're feeling
+                  </h2>
+                  {loaded.hasLog && (
+                    <span className={styles.badge}>
+                      <Icon name="check" size={14} /> Logged
+                    </span>
+                  )}
+                </div>
+                <RatingPicker
+                  label="Energy"
+                  words={ENERGY_WORDS}
+                  value={draft.energy}
+                  onChange={(energy) => edit({ energy })}
                 />
-              ))}
-              <AddSymptom onAdded={symptomAdded} existing={loaded.chips} />
-            </div>
-          </section>
+                <RatingPicker
+                  label="Mood"
+                  words={MOOD_WORDS}
+                  value={draft.mood}
+                  onChange={(mood) => edit({ mood })}
+                />
+              </section>
 
-          <section className={ui.card}>
-            <div className={ui.cardHead}>
-              <h2 className={ui.cardTitle}>
-                <Icon name="pill" /> Meds &amp; supplements
-              </h2>
-              <span className={ui.hint}>Saves as you tap</span>
-            </div>
-            <MedChecklist date={date} />
-          </section>
+              <section className={ui.card}>
+                <div className={ui.cardHead}>
+                  <h2 className={ui.cardTitle}>
+                    <Icon name="spark" /> Symptoms
+                    {loggedCount > 0 && <span className={styles.count}>{loggedCount}</span>}
+                  </h2>
+                  <span className={styles.legend} aria-hidden="true">
+                    Tap to cycle
+                    <span className={styles.swatch} data-severity="1" /> mild
+                    <span className={styles.swatch} data-severity="2" /> moderate
+                    <span className={styles.swatch} data-severity="3" /> severe
+                  </span>
+                </div>
+                {loaded.chips.length === 0 && (
+                  <p className={ui.hint}>
+                    No symptoms yet. <Link to="/settings">Pick your conditions</Link> for a starting
+                    list, or add your own below.
+                  </p>
+                )}
+                <div className={styles.chips}>
+                  {loaded.chips.map((name) => (
+                    <SymptomChip
+                      key={name}
+                      name={name}
+                      severity={draft.symptoms[name] ?? null}
+                      onTap={() => cycleSymptom(name)}
+                    />
+                  ))}
+                  <AddSymptom onAdded={symptomAdded} existing={loaded.chips} />
+                </div>
+              </section>
 
-          <section className={ui.card}>
-            <div className={ui.cardHead}>
-              <h2 className={ui.cardTitle}>
-                <Icon name="bowl" /> Food &amp; drinks
-              </h2>
-              <span className={ui.hint}>Saves as you add</span>
-            </div>
-            <MealLogger date={date} />
-          </section>
+              <section className={ui.card}>
+                <div className={ui.cardHead}>
+                  <h2 className={ui.cardTitle}>
+                    <Icon name="moon" /> Sleep last night
+                  </h2>
+                </div>
+                <SleepStepper value={draft.sleep} onChange={(sleep) => edit({ sleep })} />
+              </section>
 
-          <section className={ui.card}>
-            <div className={ui.cardHead}>
-              <h2 className={ui.cardTitle}>
-                <Icon name="moon" /> Sleep last night
-              </h2>
+              <section className={ui.card}>
+                <label className={styles.field}>
+                  <span className={ui.cardTitle}>
+                    <Icon name="note" /> Notes
+                  </span>
+                  <textarea
+                    className={styles.notes}
+                    rows={3}
+                    maxLength={2000}
+                    placeholder="Anything worth remembering about today?"
+                    value={draft.notes}
+                    onChange={(e) => edit({ notes: e.target.value })}
+                  />
+                </label>
+              </section>
             </div>
-            <SleepStepper value={draft.sleep} onChange={(sleep) => edit({ sleep })} />
-          </section>
+            <div className={styles.column}>
+              <section className={ui.card}>
+                <div className={ui.cardHead}>
+                  <h2 className={ui.cardTitle}>
+                    <Icon name="pill" /> Meds &amp; supplements
+                  </h2>
+                  <span className={ui.hint}>Saves as you tap</span>
+                </div>
+                <MedChecklist date={date} />
+              </section>
 
-          <section className={ui.card}>
-            <label className={styles.field}>
-              <span className={ui.cardTitle}>
-                <Icon name="note" /> Notes
-              </span>
-              <textarea
-                className={styles.notes}
-                rows={3}
-                maxLength={2000}
-                placeholder="Anything worth remembering about today?"
-                value={draft.notes}
-                onChange={(e) => edit({ notes: e.target.value })}
-              />
-            </label>
-          </section>
+              <section className={ui.card}>
+                <div className={ui.cardHead}>
+                  <h2 className={ui.cardTitle}>
+                    <Icon name="bowl" /> Food &amp; drinks
+                  </h2>
+                  <span className={ui.hint}>Saves as you add</span>
+                </div>
+                <MealLogger date={date} />
+              </section>
+            </div>
+          </div>
 
           {(dirty || save.kind !== 'idle') && (
             <div className={styles.saveBar} data-dirty={dirty}>

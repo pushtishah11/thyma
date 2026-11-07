@@ -46,6 +46,7 @@
 
 .form {
   display: grid;
+  align-items: start;
   /* minmax(0, 1fr): children shrink to the screen instead of stretching it */
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
@@ -230,9 +231,31 @@
   color: var(--error);
 }
 
-/* Phone: sit above the bottom tab bar. */
-@media (max-width: 640px) {
+/* Phone or small window: sit above the bottom tab bar (same breakpoint as App). */
+@media (max-width: 899px) {
   .saveBar {
     bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Two columns on a wide screen: how you feel on the left, what you took and ate on
+   the right. On narrower screens they stack, left column first. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 1rem;
+}
+
+@media (min-width: 1100px) {
+  .columns {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 1.25rem;
   }
 }

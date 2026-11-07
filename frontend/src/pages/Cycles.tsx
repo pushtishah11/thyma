@@ -93,19 +93,21 @@ export default function Cycles() {
 
       {data && (
         <>
-          <NowCard data={data} today={today} onChange={refresh} />
-          <LogPeriod today={today} onAdded={refresh} />
+          <div className={ui.pair}>
+            <NowCard data={data} today={today} onChange={refresh} />
+            <LogPeriod today={today} onAdded={refresh} />
+          </div>
           {data.summary.completed_count > 0 && <Stats summary={data.summary} />}
-          {data.summary.completed_count > 0 && (
-            <LengthsChart
-              summary={data.summary}
-              threshold={threshold}
-              onThreshold={changeThreshold}
-            />
-          )}
-          {data.cycles.length > 0 && (
-            <History data={data} today={today} onChange={refresh} />
-          )}
+          <div className={ui.pair}>
+            {data.summary.completed_count > 0 && (
+              <LengthsChart
+                summary={data.summary}
+                threshold={threshold}
+                onThreshold={changeThreshold}
+              />
+            )}
+            {data.cycles.length > 0 && <History data={data} today={today} onChange={refresh} />}
+          </div>
         </>
       )}
     </>

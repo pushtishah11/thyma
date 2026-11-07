@@ -57,49 +57,51 @@ export default function Settings() {
         <p className={ui.pageSub}>Make Thyma fit what you're tracking</p>
       </div>
 
-      <section className={ui.card}>
-        <div className={ui.cardHead}>
-          <h2 className={ui.cardTitle}>Your conditions</h2>
-        </div>
-        <p className={`${ui.hint} ${styles.intro}`}>
-          These pick your starting symptom chips. Turning one off keeps the chips you already have,
-          so your history stays intact.
-        </p>
-        {me === null && !error && <p className={ui.hint}>Loading…</p>}
-        {me && (
-          <div className={styles.options}>
-            {CONDITIONS.map(({ key, label, detail }) => {
-              const on = me.conditions.includes(key)
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  role="switch"
-                  aria-checked={on}
-                  className={styles.option}
-                  disabled={saving}
-                  onClick={() => toggleCondition(key)}
-                >
-                  <span className={styles.check} aria-hidden="true">
-                    {on && <Icon name="check" size={16} />}
-                  </span>
-                  <span className={styles.text}>
-                    <span className={styles.optionLabel}>{label}</span>
-                    <span className={styles.optionDetail}>{detail}</span>
-                  </span>
-                </button>
-              )
-            })}
+      <div className={ui.pair}>
+        <section className={ui.card}>
+          <div className={ui.cardHead}>
+            <h2 className={ui.cardTitle}>Your conditions</h2>
           </div>
-        )}
-        {error && (
-          <p className={ui.error} role="alert">
-            {error}
+          <p className={`${ui.hint} ${styles.intro}`}>
+            These pick your starting symptom chips. Turning one off keeps the chips you already have,
+            so your history stays intact.
           </p>
-        )}
-      </section>
+          {me === null && !error && <p className={ui.hint}>Loading…</p>}
+          {me && (
+            <div className={styles.options}>
+              {CONDITIONS.map(({ key, label, detail }) => {
+                const on = me.conditions.includes(key)
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    className={styles.option}
+                    disabled={saving}
+                    onClick={() => toggleCondition(key)}
+                  >
+                    <span className={styles.check} aria-hidden="true">
+                      {on && <Icon name="check" size={16} />}
+                    </span>
+                    <span className={styles.text}>
+                      <span className={styles.optionLabel}>{label}</span>
+                      <span className={styles.optionDetail}>{detail}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          {error && (
+            <p className={ui.error} role="alert">
+              {error}
+            </p>
+          )}
+        </section>
 
-      <HealthStatus />
+        <HealthStatus />
+      </div>
     </>
   )
 }
