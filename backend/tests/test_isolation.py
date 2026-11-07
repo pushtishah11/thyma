@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import Cycle, DailyLog, LogSymptom, TrackedSymptom, User
+from app.models import Cycle, DailyLog, LogSymptom, MedDose, Medication, TrackedSymptom, User
 
 DAY = date(2026, 1, 15)
 
@@ -95,3 +95,32 @@ def test_a_cannot_see_change_or_delete_bs_cycles(
     assert cycle.notes == "B's note"
     # B's period doesn't block A from logging one on the same day.
     assert client.post("/api/cycles", json={"start_date": "2026-01-10"}).status_code == 201
+
+
+def test_a_cannot_see_dose_or_change_bs_meds(
+    client: TestClient, db: Session, other_user: User
+) -> None:
+    med = Medication(
+        user_id=other_user.id, name="B's med", kind="medication", start_date=date(2026, 1, 1)
+    )
+    db.add(med)
+    db.flush()
+    db.add(MedDose(user_id=other_user.id, medication_id=med.id, date=DAY, taken=True))
+    db.flush()
+    url = f"/api/meds/{med.id}"
+
+    assert client.get("/api/meds").json() == []
+    assert client.get("/api/doses", params={"date": DAY.isoformat()}).json() == []
+    assert client.patch(url, json={"name": "mine now"}).status_code == 404
+    assert client.delete(url).status_code == 404
+    assert (
+        client.get(
+            f"{url}/adherence", params={"start": "2026-01-01", "end": "2026-01-31"}
+        ).status_code
+        == 404
+    )
+    change = {"dose": 5, "effective_date": "2026-01-20"}
+    assert client.post(f"{url}/change-dose", json=change).status_code == 404
+    assert client.put(f"/api/doses/{med.id}/{DAY}", json={"taken": False}).status_code == 404
+    db.refresh(med)
+    assert (med.name, med.end_date) == ("B's med", None)

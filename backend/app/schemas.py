@@ -1,7 +1,7 @@
 """Request and response shapes for the API (Pydantic v2)."""
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Annotated, Literal
 
@@ -231,3 +231,102 @@ class CycleSummaryOut(BaseModel):
     days_since_last_start: int | None
     gap_threshold: int
     current_gap_over_threshold: bool
+
+
+MedKind = Literal["medication", "supplement"]
+ShortText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
+Dose = Annotated[Decimal, Field(gt=0, le=100000)]
+
+
+class MedCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: ShortText
+    kind: MedKind
+    dose: Dose | None = None
+    dose_unit: Annotated[str, StringConstraints(strip_whitespace=True, max_length=20)] | None = None
+    frequency: ShortText | None = None
+    start_date: date
+    end_date: date | None = None
+    notes: Notes | None = None
+
+    @model_validator(mode="after")
+    def check_fields(self) -> "MedCreate":
+        if self.end_date is not None and self.end_date < self.start_date:
+            raise ValueError("end_date can't be before start_date")
+        if self.dose_unit and self.dose is None:
+            raise ValueError("a dose_unit needs a dose")
+        return self
+
+
+class MedPatch(BaseModel):
+    """Fix a name or note, or stop a med (end_date). Doses change via change-dose."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: ShortText | None = None
+    kind: MedKind | None = None
+    frequency: ShortText | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    notes: Notes | None = None
+
+    @field_validator("name", "kind", "start_date")
+    @classmethod
+    def required_fields_not_null(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("can't be cleared")
+        return value
+
+
+class MedOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    kind: MedKind
+    dose: float | None
+    dose_unit: str | None
+    frequency: str | None
+    start_date: date
+    end_date: date | None
+    notes: str | None
+
+
+class ChangeDose(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    dose: Dose
+    # Leave out to keep the current unit.
+    dose_unit: Annotated[str, StringConstraints(strip_whitespace=True, max_length=20)] | None = None
+    # The first day of the new dose. The old row ends the day before.
+    effective_date: date
+
+
+class DoseIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    taken: bool
+    time_taken: time | None = None
+    notes: Notes | None = None
+
+
+class DayDoseOut(BaseModel):
+    """One active med on one day, and what was recorded (taken is None if nothing yet)."""
+
+    medication: MedOut
+    taken: bool | None
+    time_taken: time | None
+    notes: str | None
+
+
+class AdherenceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start: date
+    end: date
+    active_days: int
+    taken_days: int
+    not_taken_days: int
+    unmarked_days: int
+    percent_taken: int | None
