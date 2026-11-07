@@ -118,3 +118,26 @@ class TrackedSymptom(Base):
     position: Mapped[int]
     # Hiding a chip keeps its history; deleting is only for typos.
     active: Mapped[bool] = mapped_column(default=True, server_default=text("true"))
+
+
+class Cycle(Base):
+    """One period: the day bleeding started, and optionally the last bleeding day.
+
+    Cycle length is measured start to next start, so it's computed, not stored.
+    There is no "expected" length and no prediction anywhere.
+    """
+
+    __tablename__ = "cycles"
+    __table_args__ = (
+        UniqueConstraint("user_id", "start_date", name="cycles_user_start_key"),
+        CheckConstraint(
+            "end_date IS NULL OR end_date >= start_date", name="cycles_end_after_start"
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    start_date: Mapped[date] = mapped_column(Date)
+    end_date: Mapped[date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
