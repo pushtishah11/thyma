@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.services.cycles import CycleIn, summarize_cycles
+from app.services.cycles import CycleIn, find_conflict, summarize_cycles
 
 TODAY = date(2026, 6, 1)
 
@@ -80,3 +80,29 @@ def test_future_starts_are_ignored() -> None:
 
     assert [x.start_date for x in s.cycles] == [date(2026, 5, 1)]
     assert s.days_since_last_start == 31
+
+
+def test_no_conflict_with_separate_periods() -> None:
+    others = [c("2026-01-01", "2026-01-05"), c("2026-02-10", "2026-02-14")]
+
+    assert find_conflict(others, c("2026-01-20", "2026-01-24")) is None
+    assert find_conflict([], c("2026-01-20")) is None
+
+
+def test_conflict_same_start() -> None:
+    problem = find_conflict([c("2026-01-01")], c("2026-01-01", "2026-01-03"))
+
+    assert problem == "A period already starts on 2026-01-01"
+
+
+def test_conflict_when_bleeding_days_overlap() -> None:
+    others = [c("2026-01-10", "2026-01-15")]
+
+    # Starts inside the other period.
+    assert find_conflict(others, c("2026-01-12")) is not None
+    # Runs into the other period's start.
+    assert find_conflict(others, c("2026-01-05", "2026-01-10")) is not None
+    # Ends the day before: fine.
+    assert find_conflict(others, c("2026-01-05", "2026-01-09")) is None
+    # Starts the day after it ends: fine.
+    assert find_conflict(others, c("2026-01-16")) is None

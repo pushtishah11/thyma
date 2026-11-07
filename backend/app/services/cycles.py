@@ -80,3 +80,19 @@ def summarize_cycles(
         gap_threshold=gap_threshold,
         current_gap_over_threshold=days_since is not None and days_since > gap_threshold,
     )
+
+
+def find_conflict(others: Iterable[CycleIn], candidate: CycleIn) -> str | None:
+    """Why `candidate` can't be saved next to the user's other periods, or None if it can.
+
+    Two periods can't share a start date, and their bleeding days can't overlap.
+    A period with no end date counts as just its start day.
+    """
+    cand_end = candidate.end_date or candidate.start_date
+    for other in others:
+        if other.start_date == candidate.start_date:
+            return f"A period already starts on {other.start_date.isoformat()}"
+        other_end = other.end_date or other.start_date
+        if candidate.start_date <= other_end and other.start_date <= cand_end:
+            return f"This overlaps the period that starts on {other.start_date.isoformat()}"
+    return None

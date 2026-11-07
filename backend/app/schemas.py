@@ -12,6 +12,7 @@ from pydantic import (
     Field,
     StringConstraints,
     field_validator,
+    model_validator,
 )
 
 from app.services.symptoms import normalize_symptom
@@ -163,3 +164,70 @@ class TrendsOut(BaseModel):
     avg_sleep_hours: float | None
     daily: list[DayPointOut]
     symptoms: list[SymptomTrendOut]
+
+
+Notes = Annotated[str, StringConstraints(strip_whitespace=True, max_length=2000)]
+
+
+class CycleCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    start_date: date
+    end_date: date | None = None
+    notes: Notes | None = None
+
+    @model_validator(mode="after")
+    def end_not_before_start(self) -> "CycleCreate":
+        if self.end_date is not None and self.end_date < self.start_date:
+            raise ValueError("end_date can't be before start_date")
+        return self
+
+
+class CyclePatch(BaseModel):
+    """Only the fields that are sent change. Send end_date: null to clear it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    start_date: date | None = None
+    end_date: date | None = None
+    notes: Notes | None = None
+
+    @field_validator("start_date")
+    @classmethod
+    def start_not_null(cls, value: date | None) -> date:
+        if value is None:
+            raise ValueError("start_date can't be cleared")
+        return value
+
+
+class CycleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    start_date: date
+    end_date: date | None
+    notes: str | None
+
+
+class CycleStatOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start_date: date
+    end_date: date | None
+    length_days: int | None
+    period_days: int | None
+    long_gap: bool
+
+
+class CycleSummaryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    cycles: list[CycleStatOut]
+    completed_count: int
+    mean_length: float | None
+    min_length: int | None
+    max_length: int | None
+    last_start: date | None
+    days_since_last_start: int | None
+    gap_threshold: int
+    current_gap_over_threshold: bool

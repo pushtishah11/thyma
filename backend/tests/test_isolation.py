@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import DailyLog, LogSymptom, TrackedSymptom, User
+from app.models import Cycle, DailyLog, LogSymptom, TrackedSymptom, User
 
 DAY = date(2026, 1, 15)
 
@@ -77,3 +77,21 @@ def test_a_changing_settings_does_not_touch_b(
 
     db.refresh(other_user)
     assert (other_user.conditions, other_user.track_weight) == ([], False)
+
+
+def test_a_cannot_see_change_or_delete_bs_cycles(
+    client: TestClient, db: Session, other_user: User
+) -> None:
+    cycle = Cycle(user_id=other_user.id, start_date=date(2026, 1, 10), notes="B's note")
+    db.add(cycle)
+    db.flush()
+    url = f"/api/cycles/{cycle.id}"
+
+    assert client.get("/api/cycles").json() == []
+    assert client.get("/api/cycles/summary").json()["cycles"] == []
+    assert client.patch(url, json={"notes": "changed"}).status_code == 404
+    assert client.delete(url).status_code == 404
+    db.refresh(cycle)
+    assert cycle.notes == "B's note"
+    # B's period doesn't block A from logging one on the same day.
+    assert client.post("/api/cycles", json={"start_date": "2026-01-10"}).status_code == 201
