@@ -4,6 +4,7 @@ Every table except users and markers has a user_id foreign key, and every query
 filters by it. Pydantic does the real validation; check constraints are a backstop.
 """
 
+import datetime as dt
 import uuid
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -188,3 +189,50 @@ class MedDose(Base):
     taken: Mapped[bool]
     time_taken: Mapped[time | None] = mapped_column(Time)
     notes: Mapped[str | None] = mapped_column(Text)
+
+
+MEAL_TYPES = ("breakfast", "lunch", "dinner", "snack", "drink")
+
+
+class FoodTag(Base):
+    """The built-in tag catalog (global, not per user). Seeded by migration 0005."""
+
+    __tablename__ = "food_tags"
+
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    display_name: Mapped[str] = mapped_column(Text)
+
+
+class UserFoodTag(Base):
+    """A user's own tag, like "paneer" or "matcha"."""
+
+    __tablename__ = "user_food_tags"
+    __table_args__ = (UniqueConstraint("user_id", "key", name="user_food_tags_user_key_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    key: Mapped[str] = mapped_column(Text)
+    display_name: Mapped[str] = mapped_column(Text)
+
+
+class Meal(Base):
+    """A quick description of what was eaten, plus descriptive tags. No calories, ever."""
+
+    __tablename__ = "meals"
+    __table_args__ = (
+        CheckConstraint(
+            "meal_type IN ('breakfast', 'lunch', 'dinner', 'snack', 'drink')",
+            name="meals_meal_type_known",
+        ),
+        CheckConstraint("length(description) > 0", name="meals_description_not_empty"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    date: Mapped[date] = mapped_column(Date)
+    # dt.time, not time: inside this class, `time` is the column being defined.
+    time: Mapped[dt.time | None] = mapped_column(Time)
+    meal_type: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
+    tags: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, server_default=text("'{}'"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

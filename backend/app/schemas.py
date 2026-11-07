@@ -1,5 +1,6 @@
 """Request and response shapes for the API (Pydantic v2)."""
 
+import datetime as dt
 import uuid
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -330,3 +331,78 @@ class AdherenceOut(BaseModel):
     not_taken_days: int
     unmarked_days: int
     percent_taken: int | None
+
+
+MealType = Literal["breakfast", "lunch", "dinner", "snack", "drink"]
+MealDescription = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)
+]
+TagKey = Annotated[str, StringConstraints(strip_whitespace=True, to_lower=True, max_length=40)]
+
+
+# Meal fields are named `date` and `time`, which would hide the types of the same
+# name inside these classes, so the types are written dt.date and dt.time here.
+
+
+class MealCreate(BaseModel):
+    """What was eaten, in your own words, plus tags. No calories or portions, by design."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    date: dt.date
+    time: dt.time | None = None
+    meal_type: MealType
+    description: MealDescription
+    tags: Annotated[list[TagKey], Field(max_length=20)] = []
+
+
+class MealPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    date: dt.date | None = None
+    time: dt.time | None = None
+    meal_type: MealType | None = None
+    description: MealDescription | None = None
+    tags: Annotated[list[TagKey], Field(max_length=20)] | None = None
+
+    @field_validator("date", "meal_type", "description", "tags")
+    @classmethod
+    def required_fields_not_null(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("can't be cleared")
+        return value
+
+
+class MealOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    date: dt.date
+    time: dt.time | None
+    meal_type: MealType
+    description: str
+    tags: list[str]
+
+
+class SuggestTagsIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    description: Annotated[str, StringConstraints(max_length=300)]
+
+
+class SuggestTagsOut(BaseModel):
+    tags: list[str]
+
+
+class FoodTagOut(BaseModel):
+    key: str
+    display_name: str
+    custom: bool
+
+
+class FoodTagCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    display_name: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=40)
+    ]

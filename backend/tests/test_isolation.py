@@ -10,7 +10,17 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import Cycle, DailyLog, LogSymptom, MedDose, Medication, TrackedSymptom, User
+from app.models import (
+    Cycle,
+    DailyLog,
+    LogSymptom,
+    Meal,
+    MedDose,
+    Medication,
+    TrackedSymptom,
+    User,
+    UserFoodTag,
+)
 
 DAY = date(2026, 1, 15)
 
@@ -124,3 +134,29 @@ def test_a_cannot_see_dose_or_change_bs_meds(
     assert client.put(f"/api/doses/{med.id}/{DAY}", json={"taken": False}).status_code == 404
     db.refresh(med)
     assert (med.name, med.end_date) == ("B's med", None)
+
+
+def test_a_cannot_see_or_change_bs_meals_or_tags(
+    client: TestClient, db: Session, other_user: User
+) -> None:
+    meal = Meal(
+        user_id=other_user.id, date=DAY, meal_type="lunch", description="B's lunch", tags=[]
+    )
+    db.add_all([meal, UserFoodTag(user_id=other_user.id, key="matcha", display_name="Matcha")])
+    db.flush()
+    url = f"/api/meals/{meal.id}"
+
+    assert client.get("/api/meals", params={"date": DAY.isoformat()}).json() == []
+    assert client.patch(url, json={"description": "mine"}).status_code == 404
+    assert client.delete(url).status_code == 404
+    assert all(not t["custom"] for t in client.get("/api/food-tags").json())
+    # B's tag isn't A's: A can't use it, delete it, or get it suggested...
+    body = {"date": DAY.isoformat(), "meal_type": "lunch", "description": "x", "tags": ["matcha"]}
+    assert client.post("/api/meals", json=body).status_code == 422
+    assert client.delete("/api/food-tags/matcha").status_code == 404
+    suggest = client.post("/api/meals/suggest-tags", json={"description": "matcha"}).json()
+    assert "matcha" not in suggest["tags"]
+    # ...but A can make their own with the same name.
+    assert client.post("/api/food-tags", json={"display_name": "Matcha"}).status_code == 201
+    db.refresh(meal)
+    assert meal.description == "B's lunch"
