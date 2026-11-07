@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 
 import { addTrackedSymptom, getLogs, getTrackedSymptoms, putLog } from '../api'
 import Icon from '../components/Icon'
+import MedChecklist from '../components/MedChecklist'
 import RatingPicker from '../components/RatingPicker'
 import SleepStepper from '../components/SleepStepper'
 import SymptomChip from '../components/SymptomChip'
@@ -282,6 +283,16 @@ export default function Today() {
               ))}
               <AddSymptom onAdded={symptomAdded} existing={loaded.chips} />
             </div>
+          </section>
+
+          <section className={ui.card}>
+            <div className={ui.cardHead}>
+              <h2 className={ui.cardTitle}>
+                <Icon name="pill" /> Meds &amp; supplements
+              </h2>
+              <span className={ui.hint}>Saves as you tap</span>
+            </div>
+            <MedChecklist date={date} />
           </section>
 
           <section className={ui.card}>

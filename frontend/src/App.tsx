@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router'
 
 import styles from './App.module.css'
 import Icon, { type IconName } from './components/Icon'
+import Meds from './pages/Meds'
 import Settings from './pages/Settings'
 import Today from './pages/Today'
 
@@ -14,6 +15,7 @@ const TABS: { to: string; label: string; icon: IconName }[] = [
   { to: '/today', label: 'Today', icon: 'today' },
   { to: '/trends', label: 'Trends', icon: 'trends' },
   { to: '/cycles', label: 'Cycles', icon: 'drop' },
+  { to: '/meds', label: 'Meds', icon: 'pill' },
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ]
 
@@ -61,6 +63,7 @@ function App() {
               </Suspense>
             }
           />
+          <Route path="/meds" element={<Meds />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<p>That page doesn't exist.</p>} />
         </Routes>

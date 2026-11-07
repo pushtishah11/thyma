@@ -24,6 +24,9 @@ const PATHS = {
   edit: 'M4 20h4L19 9l-4-4L4 16Z M13.5 6.5l4 4',
   trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
   calendar: 'M4 6h16v14H4Z M4 10h16 M8 3v4 M16 3v4',
+  pill: 'M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7Z M8.5 8.5l7 7',
+  stop: 'M6 6h12v12H6Z',
+  skip: 'M6 6l12 12',
 } as const
 
 export type IconName = keyof typeof PATHS

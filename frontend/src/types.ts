@@ -119,3 +119,46 @@ export type CycleSummary = {
   gap_threshold: number
   current_gap_over_threshold: boolean
 }
+
+export type MedKind = 'medication' | 'supplement'
+
+export type Med = {
+  id: string
+  name: string
+  kind: MedKind
+  dose: number | null
+  dose_unit: string | null
+  frequency: string | null
+  start_date: string
+  end_date: string | null
+  notes: string | null
+}
+
+export type MedInput = {
+  name: string
+  kind: MedKind
+  dose: number | null
+  dose_unit: string | null
+  frequency: string | null
+  start_date: string
+  end_date?: string | null
+  notes?: string | null
+}
+
+// One active med on one day; taken is null until it's marked either way.
+export type DayDose = {
+  medication: Med
+  taken: boolean | null
+  time_taken: string | null
+  notes: string | null
+}
+
+export type Adherence = {
+  start: string
+  end: string
+  active_days: number
+  taken_days: number
+  not_taken_days: number
+  unmarked_days: number
+  percent_taken: number | null
+}

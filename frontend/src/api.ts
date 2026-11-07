@@ -1,13 +1,17 @@
 // Every request to the backend goes through this file.
 
 import type {
+  Adherence,
   Cycle,
   CycleInput,
   CycleSummary,
+  DayDose,
   Health,
   Log,
   LogInput,
   Me,
+  Med,
+  MedInput,
   MePatch,
   TrackedSymptom,
   Trends,
@@ -95,3 +99,30 @@ export const patchCycle = (id: string, changes: Partial<CycleInput>) =>
   request<Cycle>(`/cycles/${id}`, { method: 'PATCH', body: JSON.stringify(changes) })
 
 export const deleteCycle = (id: string) => request<void>(`/cycles/${id}`, { method: 'DELETE' })
+
+export const getMeds = () => request<Med[]>('/meds')
+
+export const addMed = (med: MedInput) =>
+  request<Med>('/meds', { method: 'POST', body: JSON.stringify(med) })
+
+export const patchMed = (id: string, changes: Partial<MedInput>) =>
+  request<Med>(`/meds/${id}`, { method: 'PATCH', body: JSON.stringify(changes) })
+
+export const deleteMed = (id: string) => request<void>(`/meds/${id}`, { method: 'DELETE' })
+
+export const changeDose = (
+  id: string,
+  change: { dose: number; dose_unit: string | null; effective_date: string },
+) => request<Med>(`/meds/${id}/change-dose`, { method: 'POST', body: JSON.stringify(change) })
+
+export const getAdherence = (id: string, start: string, end: string) =>
+  request<Adherence>(`/meds/${id}/adherence?${new URLSearchParams({ start, end })}`)
+
+export const getDoses = (date: string) =>
+  request<DayDose[]>(`/doses?${new URLSearchParams({ date })}`)
+
+export const putDose = (medId: string, date: string, taken: boolean, timeTaken: string | null) =>
+  request<DayDose>(`/doses/${medId}/${date}`, {
+    method: 'PUT',
+    body: JSON.stringify({ taken, time_taken: timeTaken }),
+  })

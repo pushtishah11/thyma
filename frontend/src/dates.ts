@@ -39,3 +39,20 @@ export function shortDate(iso: string): string {
 export function daysBetween(a: string, b: string): number {
   return Math.round((fromIso(b).getTime() - fromIso(a).getTime()) / 86_400_000)
 }
+
+// "Dec 3", or "Dec 3, 2025" when the year isn't this one.
+export function mediumDate(iso: string): string {
+  const d = fromIso(iso)
+  const sameYear = d.getFullYear() === new Date().getFullYear()
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  })
+}
+
+// Current local time as 'HH:MM'.
+export function nowTime(): string {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}

@@ -8,18 +8,20 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
 
-import { getTrends } from '../api'
+import { getMeds, getTrends } from '../api'
 import { AXIS, TOOLTIP } from '../charts'
 import Icon, { type IconName } from '../components/Icon'
 import { addDays, shortDate, todayIso } from '../dates'
+import { type Marker, medMarkers } from '../markers'
 import ui from '../styles/ui.module.css'
-import type { Trends as TrendsData } from '../types'
+import type { Med, Trends as TrendsData } from '../types'
 import styles from './Trends.module.css'
 
 const RANGES = [30, 90, 180] as const
@@ -30,6 +32,18 @@ export default function Trends() {
   const [data, setData] = useState<{ range: Range; trends: TrendsData } | null>(null)
   const [error, setError] = useState<{ range: Range; message: string } | null>(null)
   const [retry, setRetry] = useState(0)
+  const [meds, setMeds] = useState<Med[]>([])
+
+  // Med start/stop markers are extra: if they fail to load, the charts still show.
+  useEffect(() => {
+    let active = true
+    getMeds()
+      .then((m) => active && setMeds(m))
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -92,12 +106,29 @@ export default function Trends() {
         </div>
       )}
 
-      {trends && trends.days_logged > 0 && <Charts trends={trends} />}
+      {trends && trends.days_logged > 0 && (
+        <Charts trends={trends} markers={medMarkers(meds, trends.start, trends.end)} />
+      )}
     </>
   )
 }
 
-function Charts({ trends }: { trends: TrendsData }) {
+// Called as a plain function, not <MarkerLines />: Recharts only draws ReferenceLines
+// that are direct children of the chart.
+function MarkerLines({ markers }: { markers: Marker[] }) {
+  // Numbered dashed lines; the numbers are explained in the list under the charts.
+  return markers.map((m, i) => (
+    <ReferenceLine
+      key={`${m.date}-${i}`}
+      x={shortDate(m.date)}
+      stroke="var(--muted)"
+      strokeDasharray="3 3"
+      label={{ value: String(i + 1), position: 'top', fill: 'var(--muted)', fontSize: 11 }}
+    />
+  ))
+}
+
+function Charts({ trends, markers }: { trends: TrendsData; markers: Marker[] }) {
   const daily = trends.daily.map((d) => ({ ...d, label: shortDate(d.date) }))
   const hasSleep = trends.daily.some((d) => d.sleep_hours !== null)
 
@@ -113,12 +144,13 @@ function Charts({ trends }: { trends: TrendsData }) {
           1 = lowest, 5 = highest. Gaps are days with no log.
         </p>
         <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={daily} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
+          <LineChart data={daily} margin={{ top: 16, right: 8, bottom: 0, left: -24 }}>
             <CartesianGrid stroke="var(--grid)" vertical={false} />
             <XAxis dataKey="label" {...AXIS} minTickGap={24} />
             <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} {...AXIS} />
             <Tooltip {...TOOLTIP} />
             <Legend wrapperStyle={{ fontSize: 13, color: 'var(--text)' }} />
+            {MarkerLines({ markers })}
             <Line
               name="Energy"
               dataKey="energy"
@@ -150,11 +182,12 @@ function Charts({ trends }: { trends: TrendsData }) {
         <p className={styles.caption}>Hours per night</p>
         {hasSleep ? (
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={daily} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
+            <LineChart data={daily} margin={{ top: 16, right: 8, bottom: 0, left: -24 }}>
               <CartesianGrid stroke="var(--grid)" vertical={false} />
               <XAxis dataKey="label" {...AXIS} minTickGap={24} />
               <YAxis domain={[0, 'dataMax + 1']} allowDecimals={false} {...AXIS} />
               <Tooltip {...TOOLTIP} formatter={(v) => [`${v} h`, 'Sleep']} />
+              {MarkerLines({ markers })}
               <Line
                 name="Sleep"
                 dataKey="sleep_hours"
@@ -171,6 +204,24 @@ function Charts({ trends }: { trends: TrendsData }) {
           <p className={ui.hint}>No sleep logged in this range.</p>
         )}
       </section>
+
+      {markers.length > 0 && (
+        <section className={ui.card}>
+          <h2 className={ui.cardTitle}>
+            <Icon name="pill" /> Med &amp; supplement changes
+          </h2>
+          <p className={styles.caption}>The numbered dashed lines on the charts above.</p>
+          <ol className={styles.markers}>
+            {markers.map((m, i) => (
+              <li key={`${m.date}-${i}`}>
+                <span className={styles.markerNum}>{i + 1}</span>
+                <span>{m.text}</span>
+                <span className={ui.hint}>{shortDate(m.date)}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section className={ui.card}>
         <h2 className={ui.cardTitle}>
