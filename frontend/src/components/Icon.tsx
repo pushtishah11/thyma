@@ -27,6 +27,7 @@ const PATHS = {
   pill: 'M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7Z M8.5 8.5l7 7',
   stop: 'M6 6h12v12H6Z',
   skip: 'M6 6l12 12',
+  bowl: 'M3 11h18a9 9 0 0 1-18 0Z M7 8c0-2 2-2 2-4 M12 8c0-2 2-2 2-4',
 } as const
 
 export type IconName = keyof typeof PATHS

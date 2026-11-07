@@ -38,7 +38,7 @@ KEYWORDS: dict[str, list[str]] = {
     "gluten": [
         "bread", "roti", "chapati", "naan", "paratha", "pasta", "wheat", "sandwich", "wrap",
         "pizza", "cake", "cookie", "biscuit", "noodle", "bagel", "croissant", "beer", "couscous",
-        "barley", "seitan",
+        "barley", "seitan", "toast",
     ],
     "added_sugar": [
         "sugar", "dessert", "cake", "cookie", "chocolate", "candy", "sweets", "mithai",

@@ -2,12 +2,21 @@ import random
 from datetime import date
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import User
+from app.models import Meal, User
+from app.services.cycle_records import cycle_summary
 from app.services.logs import list_logs
+from app.services.med_records import list_meds
 from app.services.symptoms import list_tracked
-from scripts.seed import AlreadyHasLogsError, seed_two_weeks
+from scripts.seed import (
+    AlreadyHasDataError,
+    AlreadyHasLogsError,
+    reset,
+    seed_cycles_meds_food,
+    seed_two_weeks,
+)
 
 TODAY = date(2026, 3, 14)
 START = date(2026, 3, 1)
@@ -68,3 +77,34 @@ def test_seed_keeps_conditions_the_user_already_picked(db: Session, user: User) 
     seed_two_weeks(db, user, TODAY, random.Random(1))
 
     assert user.conditions == ["thyroid"]
+
+
+def test_extras_write_cycles_meds_and_meals(db: Session, user: User) -> None:
+    counts = seed_cycles_meds_food(db, user, TODAY, random.Random(1))
+
+    summary = cycle_summary(db, user, TODAY, 35)
+    assert [c.length_days for c in summary.cycles] == [38, 49, None]
+    assert summary.days_since_last_start == 33
+    meds = {(m.name, float(m.dose), m.end_date is None) for m in list_meds(db, user)}
+    assert ("Levothyroxine", 75.0, True) in meds and ("Levothyroxine", 50.0, False) in meds
+    assert counts["meals"] >= 3 * 13  # 13 days, up to yesterday
+    meals = db.scalars(select(Meal).where(Meal.user_id == user.id)).all()
+    assert any("late_night" in m.tags for m in meals)
+    assert all("late_night" not in m.tags for m in meals if m.meal_type != "snack")
+
+
+def test_extras_refuse_when_data_exists(db: Session, user: User) -> None:
+    seed_cycles_meds_food(db, user, TODAY, random.Random(1))
+
+    with pytest.raises(AlreadyHasDataError):
+        seed_cycles_meds_food(db, user, TODAY, random.Random(1))
+
+
+def test_reset_clears_everything_so_seeding_works_again(db: Session, user: User) -> None:
+    seed_two_weeks(db, user, TODAY, random.Random(1))
+    seed_cycles_meds_food(db, user, TODAY, random.Random(1))
+
+    reset(db, user)
+
+    assert seed_two_weeks(db, user, TODAY, random.Random(1)) == 12
+    seed_cycles_meds_food(db, user, TODAY, random.Random(1))  # no error

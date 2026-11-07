@@ -6,9 +6,12 @@ import type {
   CycleInput,
   CycleSummary,
   DayDose,
+  FoodTag,
   Health,
   Log,
   LogInput,
+  Meal,
+  MealInput,
   Me,
   Med,
   MedInput,
@@ -125,4 +128,29 @@ export const putDose = (medId: string, date: string, taken: boolean, timeTaken: 
   request<DayDose>(`/doses/${medId}/${date}`, {
     method: 'PUT',
     body: JSON.stringify({ taken, time_taken: timeTaken }),
+  })
+
+export const getMealsForDay = (date: string) =>
+  request<Meal[]>(`/meals?${new URLSearchParams({ date })}`)
+
+export const getMealsInRange = (start: string, end: string) =>
+  request<Meal[]>(`/meals?${new URLSearchParams({ start, end })}`)
+
+export const addMeal = (meal: MealInput) =>
+  request<Meal>('/meals', { method: 'POST', body: JSON.stringify(meal) })
+
+export const deleteMeal = (id: string) => request<void>(`/meals/${id}`, { method: 'DELETE' })
+
+export const suggestTags = (description: string) =>
+  request<{ tags: string[] }>('/meals/suggest-tags', {
+    method: 'POST',
+    body: JSON.stringify({ description }),
+  })
+
+export const getFoodTags = () => request<FoodTag[]>('/food-tags')
+
+export const addFoodTag = (displayName: string) =>
+  request<FoodTag>('/food-tags', {
+    method: 'POST',
+    body: JSON.stringify({ display_name: displayName }),
   })

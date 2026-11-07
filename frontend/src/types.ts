@@ -162,3 +162,29 @@ export type Adherence = {
   unmarked_days: number
   percent_taken: number | null
 }
+
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'drink'
+
+// What was eaten and descriptive tags. There are no calories or portions anywhere.
+export type Meal = {
+  id: string
+  date: string
+  time: string | null
+  meal_type: MealType
+  description: string
+  tags: string[]
+}
+
+export type MealInput = {
+  date: string
+  time: string | null
+  meal_type: MealType
+  description: string
+  tags: string[]
+}
+
+export type FoodTag = {
+  key: string
+  display_name: string
+  custom: boolean
+}

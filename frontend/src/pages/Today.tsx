@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 
 import { addTrackedSymptom, getLogs, getTrackedSymptoms, putLog } from '../api'
 import Icon from '../components/Icon'
+import MealLogger from '../components/MealLogger'
 import MedChecklist from '../components/MedChecklist'
 import RatingPicker from '../components/RatingPicker'
 import SleepStepper from '../components/SleepStepper'
@@ -293,6 +294,16 @@ export default function Today() {
               <span className={ui.hint}>Saves as you tap</span>
             </div>
             <MedChecklist date={date} />
+          </section>
+
+          <section className={ui.card}>
+            <div className={ui.cardHead}>
+              <h2 className={ui.cardTitle}>
+                <Icon name="bowl" /> Food &amp; drinks
+              </h2>
+              <span className={ui.hint}>Saves as you add</span>
+            </div>
+            <MealLogger date={date} />
           </section>
 
           <section className={ui.card}>

@@ -17,6 +17,7 @@ import {
 
 import { getMeds, getTrends } from '../api'
 import { AXIS, TOOLTIP } from '../charts'
+import FoodList from '../components/FoodList'
 import Icon, { type IconName } from '../components/Icon'
 import { addDays, shortDate, todayIso } from '../dates'
 import { type Marker, medMarkers } from '../markers'
@@ -109,6 +110,8 @@ export default function Trends() {
       {trends && trends.days_logged > 0 && (
         <Charts trends={trends} markers={medMarkers(meds, trends.start, trends.end)} />
       )}
+
+      {trends && <FoodList start={trends.start} end={trends.end} />}
     </>
   )
 }

@@ -27,6 +27,10 @@ def test_multi_word_keywords() -> None:
     assert "high_fiber" in suggest_tags("brown rice bowl")
 
 
+def test_toast_counts_as_gluten() -> None:
+    assert suggest_tags("two eggs and toast") == ["gluten", "high_protein"]
+
+
 def test_nothing_matches_gives_no_tags() -> None:
     assert suggest_tags("") == []
     assert suggest_tags("something new") == []
