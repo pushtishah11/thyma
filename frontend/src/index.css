@@ -1,64 +1,38 @@
 /* Global colors and base styles. Components use CSS modules for everything else. */
 
 :root {
-  /* Light: pale mint background, white cards, teal-blue accent. */
-  --text: #2f4a50;
-  --text-strong: #12313a;
-  --muted: #5e7d83;
-  --bg: #f2f8f8;
+  /* Light only for now: warm beige background, white cards, navy accent. */
+  --text: #3a4152;
+  --text-strong: #1b2a4a;
+  --muted: #60646f;
+  --bg: #f5efe4;
   --surface: #ffffff;
-  --border: #d5e6e8;
-  --ok: #1f8a5c;
+  --field: #fbf8f2;
+  --border: #e5dccb;
+  --ok: #2f7a52;
   --error: #b3403a;
-  --accent: #0f7c8c;
+  --accent: #1f3a6d;
   --on-accent: #ffffff;
-  --accent-soft: #d9eff1;
-  /* Symptom severity: one teal at three strengths (never red/amber/green). */
-  --sev-1: #e3f4f5;
-  --sev-2: #b5e1e5;
-  --sev-3: #7cc7ce;
+  --accent-soft: #e4e9f3;
+  /* Symptom severity: one navy-blue at three strengths (never red/amber/green). */
+  --sev-1: #edf0f7;
+  --sev-2: #ccd5e7;
+  --sev-3: #93a6ca;
   /* Chart series: validated for colorblind separation on these surfaces. */
   --series-1: #2a78d6;
   --series-2: #eb6834;
-  --grid: #e3eeef;
-  --field: #f5fafa;
-  --shadow: 0 1px 2px rgb(18 49 58 / 6%), 0 4px 16px rgb(18 49 58 / 6%);
-  --shadow-lift: 0 2px 6px rgb(18 49 58 / 10%), 0 12px 32px rgb(18 49 58 / 12%);
+  --grid: #efe8dc;
+  --shadow: 0 1px 2px rgb(27 42 74 / 5%), 0 4px 16px rgb(27 42 74 / 6%);
+  --shadow-lift: 0 2px 6px rgb(27 42 74 / 10%), 0 12px 32px rgb(27 42 74 / 12%);
   --radius: 14px;
-  --page-glow: radial-gradient(1200px 500px at 50% -200px, #d3eef1 0%, transparent 70%);
+  --page-glow: radial-gradient(1200px 500px at 50% -200px, #fbf8f2 0%, transparent 70%);
 
   font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
-  color-scheme: light dark;
+  /* Light mode only, even when the Mac is in dark mode (dark mode may come back later). */
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark: deep ocean teal instead of black. */
-    --text: #c5dfe1;
-    --text-strong: #effafa;
-    --muted: #86a9ad;
-    --bg: #0d2a30;
-    --surface: #143840;
-    --border: #23505a;
-    --ok: #5cc28d;
-    --error: #f08a82;
-    --accent: #4fc3cf;
-    --on-accent: #0b2328;
-    --accent-soft: #1d4d56;
-    --sev-1: #1b4a52;
-    --sev-2: #236571;
-    --sev-3: #2f8794;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --grid: #1d454e;
-    --field: #10313a;
-    --shadow: 0 1px 2px rgb(0 0 0 / 20%), 0 4px 16px rgb(0 0 0 / 18%);
-    --shadow-lift: 0 2px 6px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 30%);
-    --page-glow: radial-gradient(1200px 500px at 50% -200px, #18505a 0%, transparent 70%);
-  }
 }
 
 body {
