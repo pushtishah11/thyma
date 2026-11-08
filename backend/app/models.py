@@ -236,3 +236,63 @@ class Meal(Base):
     description: Mapped[str] = mapped_column(Text)
     tags: Mapped[list[str]] = mapped_column(ARRAY(Text), default=list, server_default=text("'{}'"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+MARKER_CATEGORIES = ("thyroid", "androgens", "reproductive", "metabolic", "other")
+
+
+class Marker(Base):
+    """The lab marker catalog (global, not per user). Seeded by migration 0006."""
+
+    __tablename__ = "markers"
+    __table_args__ = (
+        CheckConstraint(
+            "category IN ('thyroid', 'androgens', 'reproductive', 'metabolic', 'other')",
+            name="markers_category_known",
+        ),
+    )
+
+    key: Mapped[str] = mapped_column(Text, primary_key=True)
+    display_name: Mapped[str] = mapped_column(Text)
+    category: Mapped[str] = mapped_column(Text)
+    # Lowercase names seen on real reports, used to match extracted rows in M4.
+    aliases: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), default=list, server_default=text("'{}'")
+    )
+    # Display order within its category.
+    position: Mapped[int]
+
+
+class LabResult(Base):
+    """One lab value: typed in by hand, or (from M4) extracted from a report and confirmed.
+
+    Only confirmed rows appear in charts and summaries.
+    """
+
+    __tablename__ = "lab_results"
+    __table_args__ = (
+        CheckConstraint(
+            "ref_low IS NULL OR ref_high IS NULL OR ref_low <= ref_high",
+            name="lab_results_ref_range_ordered",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    # Null means entered by hand. Becomes a foreign key to lab_documents in M4.
+    document_id: Mapped[uuid.UUID | None]
+    date: Mapped[dt.date] = mapped_column(Date)
+    # Null if the name on the report didn't match the catalog; raw_marker is always kept.
+    marker_key: Mapped[str | None] = mapped_column(ForeignKey("markers.key"))
+    raw_marker: Mapped[str] = mapped_column(Text)
+    value: Mapped[Decimal] = mapped_column(Numeric)
+    # As printed, e.g. "<0.5", so a bound isn't mistaken for an exact number.
+    value_text: Mapped[str] = mapped_column(Text)
+    unit: Mapped[str] = mapped_column(Text)
+    ref_low: Mapped[Decimal | None] = mapped_column(Numeric)
+    ref_high: Mapped[Decimal | None] = mapped_column(Numeric)
+    ref_text: Mapped[str | None] = mapped_column(Text)
+    page: Mapped[int | None]
+    source_line: Mapped[str | None] = mapped_column(Text)
+    confirmed: Mapped[bool] = mapped_column(default=False, server_default=text("false"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
