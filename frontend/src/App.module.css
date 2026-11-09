@@ -118,15 +118,19 @@
     left: 0;
     display: flex;
     justify-content: space-around;
-    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+    gap: 0.15rem;
+    padding: 0.4rem 0.35rem calc(0.4rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
     background: var(--surface);
   }
 
+  /* Six tabs share the width evenly, so they fit on a 360px phone. */
   .tab {
+    flex: 1;
     flex-direction: column;
     gap: 0.1rem;
-    padding: 0.35rem 0.8rem;
+    min-width: 0;
+    padding: 0.35rem 0.1rem;
     font-size: 0.72rem;
   }
 

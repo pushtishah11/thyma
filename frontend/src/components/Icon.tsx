@@ -28,6 +28,7 @@ const PATHS = {
   stop: 'M6 6h12v12H6Z',
   skip: 'M6 6l12 12',
   bowl: 'M3 11h18a9 9 0 0 1-18 0Z M7 8c0-2 2-2 2-4 M12 8c0-2 2-2 2-4',
+  flask: 'M9 3h6 M10 3v6l-5.2 9.2A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.8L14 9V3 M7.3 15h9.4',
 } as const
 
 export type IconName = keyof typeof PATHS

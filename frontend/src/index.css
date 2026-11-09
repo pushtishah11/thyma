@@ -22,6 +22,10 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --grid: #efe8dc;
+  /* Labs: the reference band, and points outside the range on their own report. */
+  --band: #e7ecf5;
+  --flag: #a5450f;
+  --flag-soft: #fbeadf;
   --shadow: 0 1px 2px rgb(27 42 74 / 5%), 0 4px 16px rgb(27 42 74 / 6%);
   --shadow-lift: 0 2px 6px rgb(27 42 74 / 10%), 0 12px 32px rgb(27 42 74 / 12%);
   --radius: 14px;

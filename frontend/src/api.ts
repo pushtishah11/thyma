@@ -8,6 +8,9 @@ import type {
   DayDose,
   FoodTag,
   Health,
+  LabInput,
+  LabMarker,
+  LabResult,
   Log,
   LogInput,
   Meal,
@@ -154,3 +157,15 @@ export const addFoodTag = (displayName: string) =>
     method: 'POST',
     body: JSON.stringify({ display_name: displayName }),
   })
+
+export const getMarkers = () => request<LabMarker[]>('/markers')
+
+export const getLabs = () => request<LabResult[]>('/labs')
+
+export const addLab = (lab: LabInput) =>
+  request<LabResult>('/labs', { method: 'POST', body: JSON.stringify(lab) })
+
+export const patchLab = (id: string, changes: Partial<LabInput>) =>
+  request<LabResult>(`/labs/${id}`, { method: 'PATCH', body: JSON.stringify(changes) })
+
+export const deleteLab = (id: string) => request<void>(`/labs/${id}`, { method: 'DELETE' })

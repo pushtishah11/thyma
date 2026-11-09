@@ -188,3 +188,38 @@ export type FoodTag = {
   display_name: string
   custom: boolean
 }
+
+export type MarkerCategory = 'thyroid' | 'androgens' | 'reproductive' | 'metabolic' | 'other'
+
+export type LabMarker = {
+  key: string
+  display_name: string
+  category: MarkerCategory
+}
+
+// Only ever relative to the range printed on the user's own report.
+export type LabFlag = 'below' | 'within' | 'above'
+
+export type LabResult = {
+  id: string
+  date: string
+  marker_key: string | null
+  raw_marker: string
+  value: number
+  value_text: string // as printed, e.g. '<0.5'
+  unit: string
+  ref_low: number | null
+  ref_high: number | null
+  ref_text: string | null
+  flag: LabFlag | null
+  from_report: boolean
+}
+
+export type LabInput = {
+  date: string
+  marker_key: string
+  value_text: string
+  unit: string
+  ref_low: number | null
+  ref_high: number | null
+}
