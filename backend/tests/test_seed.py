@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.models import Meal, User
 from app.services.cycle_records import cycle_summary
+from app.services.flags import flag
+from app.services.labs import list_markers, list_results
 from app.services.logs import list_logs
 from app.services.med_records import list_meds
 from app.services.symptoms import list_tracked
@@ -15,6 +17,7 @@ from scripts.seed import (
     AlreadyHasLogsError,
     reset,
     seed_cycles_meds_food,
+    seed_labs,
     seed_two_weeks,
 )
 
@@ -108,3 +111,32 @@ def test_reset_clears_everything_so_seeding_works_again(db: Session, user: User)
 
     assert seed_two_weeks(db, user, TODAY, random.Random(1)) == 12
     seed_cycles_meds_food(db, user, TODAY, random.Random(1))  # no error
+
+
+def test_labs_cover_every_case_the_labs_page_shows(db: Session, user: User) -> None:
+    written = seed_labs(db, user, TODAY)
+
+    results = list_results(db, user)  # confirmed only
+    assert written == len(results) == 26
+    out = results
+    flags = {flag(r.value, r.ref_low, r.ref_high, r.value_text) for r in results}
+    assert flags == {"below", "within", "above", None}
+    assert {o.value_text[0] for o in out} >= {"<", ">"}
+    testosterone_units = {o.unit for o in out if o.marker_key == "total_testosterone"}
+    assert testosterone_units == {"ng/dL", "nmol/L"}
+    tsh_ranges = {(o.ref_low, o.ref_high) for o in out if o.marker_key == "tsh"}
+    assert len(tsh_ranges) == 2
+    category = {m.key: m.category for m in list_markers(db)}
+    assert {category[o.marker_key] for o in out} == {
+        "thyroid", "androgens", "reproductive", "metabolic", "other",
+    }  # fmt: skip
+
+
+def test_lab_seed_refuses_when_labs_exist_and_reset_clears_them(db: Session, user: User) -> None:
+    seed_labs(db, user, TODAY)
+    with pytest.raises(AlreadyHasDataError):
+        seed_labs(db, user, TODAY)
+
+    reset(db, user)
+
+    assert seed_labs(db, user, TODAY) == 26

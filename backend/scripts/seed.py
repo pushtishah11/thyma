@@ -4,9 +4,10 @@
     .venv/bin/python -m scripts.seed            # fills only the parts that are empty
     .venv/bin/python -m scripts.seed --reset    # deletes ALL of the dev user's data first
 
-Two parts, each skipped if the dev user already has that kind of data:
+Three parts, each skipped if the dev user already has that kind of data:
   1. two weeks of daily logs
   2. three periods, three meds/supplements with two weeks of doses, and two weeks of meals
+  3. lab results from three made-up reports
 
 Everything here is made up by a seeded random generator; none of it is real
 health data. M6 replaces this with the full 5-month demo user.
@@ -21,8 +22,8 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.models import Cycle, DailyLog, Meal, Medication, User, UserFoodTag
-from app.services import cycle_records, food_records, med_records
+from app.models import Cycle, DailyLog, LabResult, Meal, Medication, User, UserFoodTag
+from app.services import cycle_records, food_records, labs, med_records
 from app.services.food import suggest_tags
 from app.services.logs import upsert_log
 from app.services.symptoms import list_tracked
@@ -187,9 +188,74 @@ def seed_cycles_meds_food(
     return {"cycles": 3, "meds": 4, "doses": doses, "meals": meals}
 
 
+# Three made-up reports: (days ago, [(marker, value as printed, unit, ref_low, ref_high)]).
+# Chosen to show every case on the Labs page: below / within / above, a "<" and a ">"
+# value, a range with only a high end, a test with no range, a second lab that prints a
+# different TSH range, and testosterone reported in two different units.
+LAB_REPORTS: list[tuple[int, list[tuple[str, str, str, str | None, str | None]]]] = [
+    (200, [
+        ("tsh", "6.2", "mIU/L", "0.45", "4.5"),
+        ("free_t4", "0.78", "ng/dL", "0.82", "1.77"),
+        ("tpo_antibodies", "88", "IU/mL", None, "34"),
+        ("total_testosterone", "58", "ng/dL", "8", "48"),
+        ("shbg", "22", "nmol/L", "24.6", "122"),
+        ("lh", "12.1", "mIU/mL", None, None),
+        ("fasting_insulin", "14.2", "uIU/mL", "2.6", "24.9"),
+        ("hba1c", "5.4", "%", "4.8", "5.6"),
+        ("vitamin_d", "18", "ng/mL", "30", "100"),
+    ]),
+    (110, [
+        ("tsh", "4.6", "mIU/L", "0.4", "4.0"),
+        ("free_t4", "0.95", "ng/dL", "0.82", "1.77"),
+        ("tpo_antibodies", "92", "IU/mL", None, "34"),
+        ("total_testosterone", "1.9", "nmol/L", "0.3", "1.7"),
+        ("fasting_glucose", "92", "mg/dL", "70", "99"),
+        ("vitamin_d", "21", "ng/mL", "30", "100"),
+        ("ferritin", "22", "ng/mL", "15", "150"),
+    ]),
+    (25, [
+        ("tsh", "2.8", "mIU/L", "0.45", "4.5"),
+        ("free_t4", "1.21", "ng/dL", "0.82", "1.77"),
+        ("tpo_antibodies", "79", "IU/mL", None, "34"),
+        ("thyroglobulin_antibodies", "<1.0", "IU/mL", None, "4.0"),
+        ("total_testosterone", "1.5", "nmol/L", "0.3", "1.7"),
+        ("shbg", "31", "nmol/L", "24.6", "122"),
+        ("fasting_insulin", "11.8", "uIU/mL", "2.6", "24.9"),
+        ("hba1c", "5.5", "%", "4.8", "5.6"),
+        ("vitamin_d", "34", "ng/mL", "30", "100"),
+        ("b12", ">2000", "pg/mL", "232", "1245"),
+    ]),
+]  # fmt: skip
+
+
+def seed_labs(db: Session, user: User, today: date) -> int:
+    """Confirmed results from three synthetic reports. Returns how many were written."""
+    existing = db.scalar(select(func.count()).where(LabResult.user_id == user.id))
+    if existing:
+        raise AlreadyHasDataError(f"user already has {existing} lab results")
+
+    written = 0
+    for days_ago, rows in LAB_REPORTS:
+        for key, value_text, unit, low, high in rows:
+            marker = labs.get_marker(db, key)
+            assert marker is not None, key  # the catalog is seeded by migration
+            labs.create_result(
+                db, user,
+                {
+                    "date": today - timedelta(days=days_ago), "marker_key": key,
+                    "raw_marker": marker.display_name, "value_text": value_text,
+                    "value": labs.parse_value(value_text), "unit": unit,
+                    "ref_low": Decimal(low) if low else None,
+                    "ref_high": Decimal(high) if high else None,
+                },
+            )  # fmt: skip
+            written += 1
+    return written
+
+
 def reset(db: Session, user: User) -> None:
-    """Delete ALL of the user's logs, cycles, meds (and doses), meals and custom tags."""
-    for model in (DailyLog, Cycle, Medication, Meal, UserFoodTag):
+    """Delete ALL of the user's logs, cycles, meds (and doses), meals, custom tags and labs."""
+    for model in (DailyLog, Cycle, Medication, Meal, UserFoodTag, LabResult):
         db.execute(delete(model).where(model.user_id == user.id))
     db.commit()
 
@@ -205,7 +271,7 @@ def main() -> None:
         user = get_or_create_dev_user(db)
         if args.reset:
             reset(db, user)
-            print("Deleted all of the dev user's logs, cycles, meds, meals and custom tags.")
+            print("Deleted all of the dev user's logs, cycles, meds, meals, custom tags and labs.")
         rng = random.Random(42)
         try:
             written = seed_two_weeks(db, user, date.today(), rng)
@@ -217,6 +283,11 @@ def main() -> None:
             print("Wrote " + ", ".join(f"{n} {what}" for what, n in counts.items()) + ".")
         except AlreadyHasDataError as e:
             print(f"Skipped cycles, meds and meals: the dev {e}.")
+        try:
+            written = seed_labs(db, user, date.today())
+            print(f"Wrote {written} synthetic lab results from 3 made-up reports.")
+        except AlreadyHasDataError as e:
+            print(f"Skipped labs: the dev {e}.")
 
 
 if __name__ == "__main__":
