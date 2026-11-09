@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.models import (
     Cycle,
     DailyLog,
+    LabResult,
     LogSymptom,
     Meal,
     MedDose,
@@ -160,3 +161,22 @@ def test_a_cannot_see_or_change_bs_meals_or_tags(
     assert client.post("/api/food-tags", json={"display_name": "Matcha"}).status_code == 201
     db.refresh(meal)
     assert meal.description == "B's lunch"
+
+
+def test_a_cannot_see_or_change_bs_lab_results(
+    client: TestClient, db: Session, other_user: User
+) -> None:
+    row = LabResult(
+        user_id=other_user.id, date=DAY, marker_key="tsh", raw_marker="TSH",
+        value=6, value_text="6", unit="mIU/L", confirmed=True,
+    )  # fmt: skip
+    db.add(row)
+    db.flush()
+    url = f"/api/labs/{row.id}"
+
+    assert client.get("/api/labs").json() == []
+    assert client.get("/api/labs", params={"marker_key": "tsh"}).json() == []
+    assert client.patch(url, json={"value_text": "1"}).status_code == 404
+    assert client.delete(url).status_code == 404
+    db.refresh(row)
+    assert row.value_text == "6"

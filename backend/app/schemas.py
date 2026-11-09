@@ -406,3 +406,67 @@ class FoodTagCreate(BaseModel):
     display_name: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=1, max_length=40)
     ]
+
+
+class MarkerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    key: str
+    display_name: str
+    category: Literal["thyroid", "androgens", "reproductive", "metabolic", "other"]
+
+
+ValueText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=20)]
+Unit = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=20)]
+RefBound = Annotated[Decimal, Field(ge=0, le=1_000_000)]
+
+
+class LabCreate(BaseModel):
+    """A result typed in by hand. The range is the one printed on your own report."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    date: dt.date
+    marker_key: str
+    # As printed: "2.1", "<0.5", ">90". The number is parsed from it by the server.
+    value_text: ValueText
+    unit: Unit
+    ref_low: RefBound | None = None
+    ref_high: RefBound | None = None
+
+
+class LabPatch(BaseModel):
+    """Only the fields that are sent change. Send ref_low/ref_high: null to clear them."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    date: dt.date | None = None
+    marker_key: str | None = None
+    value_text: ValueText | None = None
+    unit: Unit | None = None
+    ref_low: RefBound | None = None
+    ref_high: RefBound | None = None
+
+    @field_validator("date", "marker_key", "value_text", "unit")
+    @classmethod
+    def required_fields_not_null(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("can't be cleared")
+        return value
+
+
+class LabOut(BaseModel):
+    id: uuid.UUID
+    date: dt.date
+    marker_key: str | None
+    raw_marker: str
+    value: float
+    value_text: str
+    unit: str
+    ref_low: float | None
+    ref_high: float | None
+    ref_text: str | None
+    # Only ever below / within / above the report's own range; null if there's no range
+    # or a "<"/">" value can't be placed.
+    flag: Literal["below", "within", "above"] | None
+    from_report: bool

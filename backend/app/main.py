@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db import SessionLocal
-from app.routers import cycles, food, health, logs, me, meds, tracked_symptoms, trends
+from app.routers import cycles, food, health, labs, logs, me, meds, tracked_symptoms, trends
 from app.services.users import get_or_create_dev_user
 
 
@@ -27,3 +27,4 @@ app.include_router(trends.router, prefix="/api")
 app.include_router(cycles.router, prefix="/api")
 app.include_router(meds.router, prefix="/api")
 app.include_router(food.router, prefix="/api")
+app.include_router(labs.router, prefix="/api")
